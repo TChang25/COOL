@@ -1,0 +1,18 @@
+.md-grid {
+    max-width: 70rem;
+}
+
+.md-nav {
+    font-size: .84rem;
+}
+
+.md-typeset .md-tabs__link {
+    font-size: .9rem;
+}
+
+.md-tabs__link {
+    font-size: .9rem;
+}
+.md-header__title {
+    font-size: 1rem;
+}
