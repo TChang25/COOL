@@ -170,18 +170,11 @@ CREATE TABLE bin (
     asset_tag VARCHAR(50) NOT NULL UNIQUE, -- unique identifier for the bin used for inventory tracking (bin # already in use by county)
     bin_contents VARCHAR(255), -- description of what is stored in the bin (e.g. "Laptop + hotspot", "Tablet", etc.)
     created_by_user_id BIGINT NOT NULL, -- a bin must have a creator (employee)
-
-    device_id BIGINT, -- can be NULL if bin is empty
     location_id INT NOT NULL, -- a bin must be associated with a location
 
     -- Auto-updates timestamp whenever the row is modified (on update CURRENT_TIMESTAMP)
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_bin_device
-        FOREIGN KEY (device_id) REFERENCES device(device_id)
-        ON DELETE SET NULL -- if a device is deleted, set device_id to NULL (to allow reusing the bin)
-        ON UPDATE CASCADE, -- if a device_id changes, all linked bins are updated automatically to stay in sync (to avoid orphaned bins)
 
     CONSTRAINT fk_bin_location
         FOREIGN KEY (location_id) REFERENCES location(location_id)
@@ -197,7 +190,7 @@ CREATE TABLE bin (
 -- Tracks each loan transaction, linking a device to a citizen and employee. [CORE ENTITY]
 CREATE TABLE loan (
     loan_id INT PRIMARY KEY AUTO_INCREMENT,
-    device_id BIGINT NOT NULL, -- a loan must be associated with a device
+    bin_id INT NOT NULL, -- loan references the bin the device came from
     loan_status_id INT NOT NULL, -- a loan must have a status
 
     -- The user who is borrowing the device (citizen) and the employee processing the loan
@@ -224,11 +217,11 @@ CREATE TABLE loan (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
-    CONSTRAINT fk_loan_device 
-        FOREIGN KEY (device_id) REFERENCES device(device_id)
-        ON DELETE RESTRICT -- prevents deletion of a device if loans are associated with it
-        ON UPDATE CASCADE, -- if a device_id changes, all linked loans are updated automatically to stay in sync
-
+    CONSTRAINT fk_loan_bin
+        FOREIGN KEY (bin_id) REFERENCES bin(bin_id)
+        ON DELETE RESTRICT -- prevents deletion of a bin if loans are associated with it
+        ON UPDATE CASCADE, -- if a bin_id changes, all linked loans are updated automatically to stay in sync
+        
     CONSTRAINT fk_loan_status
         FOREIGN KEY (loan_status_id) REFERENCES loan_status(loan_status_id)
         ON DELETE RESTRICT -- prevents deletion of a loan status if loans are associated with it
@@ -361,6 +354,28 @@ CREATE TABLE user_location_access (
         FOREIGN KEY (location_id) REFERENCES location(location_id)
         ON DELETE CASCADE -- if a location is deleted, all associated access entries are also deleted
         ON UPDATE CASCADE -- if a location_id changes, all linked access entries are updated automatically to stay in sync
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci; -- MySQL's transactional storage engine to support foreign keys and transactions (required for Hibernate and FKs)
+
+-- Links devices to bins [JOIN TABLE]
+CREATE TABLE bin_device (
+    bin_id INT NOT NULL, -- an entry must be associated with a bin
+    device_id BIGINT NOT NULL, -- a device can be in only one bin at a time
+    
+    -- Composite primary key so that each device can only be in one bin at a time
+    PRIMARY KEY (bin_id, device_id), 
+
+    -- Unique Key constraint to keep a device from being in multiple bins at once
+    UNIQUE KEY uk_device_id (device_id),
+
+    CONSTRAINT fk_bindevice_bin
+        FOREIGN KEY (bin_id) REFERENCES bin(bin_id)
+        ON DELETE CASCADE -- if a bin is deleted, remove all devices from that bin
+        ON UPDATE CASCADE, 
+
+    CONSTRAINT fk_bindevice_device
+        FOREIGN KEY (device_id) REFERENCES device(device_id)
+        ON DELETE CASCADE -- if a device is deleted, remove from bin 
+        ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci; -- MySQL's transactional storage engine to support foreign keys and transactions (required for Hibernate and FKs)
 
 -- Re-enable foreign key checks now that all tables are created

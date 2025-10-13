@@ -27,7 +27,7 @@ erDiagram
         %% This is used by action_log to describe *what* the user did
         INT user_action_type_id PK
        
-        VARCHAR(50) user_action_name "Create, Read, Update, Delete (NOT NULL UNIQUE)"
+        VARCHAR(50) user_action_type_name "Create, Read, Update, Delete (NOT NULL UNIQUE)"
         BOOLEAN is_active "(DEFAULT TRUE NOT NULL)"
     }
 
@@ -35,7 +35,7 @@ erDiagram
         %% [LOOKUP] Allowed types of devices in the system
         INT device_type_id PK
        
-        VARCHAR(50) device_type_name "Mobile Phone, Laptop, Tablet, etc. (NOT NULL UNIQUE)"
+        VARCHAR(50) device_type_name "Tablet, Laptop, Hotspot (NOT NULL UNIQUE)"
         BOOLEAN is_active "(DEFAULT TRUE)"
     }
 
@@ -57,14 +57,14 @@ erDiagram
         %% [LOOKUP] Allowed loan lifecycle states
         INT loan_status_id PK
        
-        VARCHAR(50) loan_status_name "Open, Returned, Overdue, Lost, (NOT NULL UNIQUE)" 
+        VARCHAR(50) loan_status_name "Open, Returned, Overdue, Lost, Cancelled (NOT NULL UNIQUE)" 
     }
 
     loan_action_type {
         %% [LOOKUP] Defines loan-specific actions
         INT loan_action_type_id PK
        
-        VARCHAR(50) loan_action_type_name "Checkout, Return, Status_Change, (NOT NULL UNIQUE)"
+        VARCHAR(50) loan_action_name "Checkout, Return, Status_Change, (NOT NULL UNIQUE)"
        
         %% allows you to turn off loans durings maintenance
         BOOLEAN is_active "(DEFAULT TRUE)" 
@@ -87,7 +87,6 @@ erDiagram
         VARCHAR(100) app_user_full_name "(NOT NULL)"
         VARCHAR(100) email "(UNIQUE NOT NULL)"
         VARCHAR(255) password_hash "(NOT NULL)"
-        VARBINARY(64) password_salt "per-user salt for hashing passwords NOT NULL"
         
         %% INT role_id (NOT NULL) Ensures that every user has a role, a user cannot exist in the system without one
         INT user_role_id FK "NOT NULL"  
@@ -99,7 +98,7 @@ erDiagram
         CHAR(2) state "Citizen State"
         VARCHAR(10) zip_code "Citizen zip code" 
         DATE date_of_birth "Citizen DOB"
-        VARCHAR(20) phone_number "Citizen phone number"
+        VARCHAR(20) contact_number "Citizen phone number"
        
         TIMESTAMP created_at
         TIMESTAMP updated_at
@@ -114,7 +113,7 @@ erDiagram
         VARCHAR(100) city "Community Center city"
         CHAR(2) state "Community Center state"
         VARCHAR(10) zip_code "community center zip"
-        VARCHAR(20) contact_phone "Community Center phone"
+        VARCHAR(20) contact_number "Community Center phone"
       
         TIMESTAMP created_at 
         TIMESTAMP updated_at
@@ -123,9 +122,9 @@ erDiagram
     bin {
         %% [CORE] Physical bins used to contain devices (laptops, hotspots, tablets, accessories)
         INT bin_id PK 
+        VARCHAR(50) asset_tag "Unique bin identifier (NOT NULL UNIQUE)"
         VARCHAR(255) bin_contents "Bin contents (NOT NULL) - example: Laptop + hotspot, tablet, hotspot"
 
-        BIGINT device_id FK "Points to the device table (nullable if bin is empty)"
         INT location_id FK "Points to location table (NOT NULL)"
         BIGINT created_by_user_id FK "A bin must have a creator (employee),(NOT NULL)"
 
@@ -162,7 +161,7 @@ erDiagram
        
         BIGINT citizen_id FK "Points to app_user (the borrower)(NOT NULL)"
         BIGINT employee_id FK "Points to app_user (staff)(NOT NULL)"
-        BIGINT device_id FK
+        INT bin_id FK "Points to bin (The container being loaned)(NOT NULL)"
         INT loan_status_id FK "Points to loan_status (Open, Returned,etc.)"
        
         TIMESTAMP start_at "when the loan begin (NOT NULL)"
@@ -237,6 +236,16 @@ erDiagram
         %% PK (app_user_id, location_id)
     }
 
+
+    bin_device {
+        %% [JOIN] Links devices to bins - a device can only be in one bin at a time
+        INT bin_id FK "(NOT NULL)"
+        BIGINT device_id FK "(NOT NULL)"
+        %% PK (bin_id, device_id)
+        %% UNIQUE KEY 
+    }
+
+
     %% ===[ RELATIONSHIPS ]===
 
     user_role ||--o{ app_user : "user_role_id"
@@ -246,11 +255,14 @@ erDiagram
     device_condition ||--o{ loan : "return_condition_id"
     app_user ||--o{ loan : "citizen_id"
     app_user ||--o{ loan : "employee_id"
-    device ||--o{ loan : "device_id"
 
     app_user ||--o{ user_location_access : "app_user_id"
     location ||--o{ user_location_access : "location_id"   
     
+    bin ||--o{ bin_device : "bin_id"
+    device ||--o{ bin_device : "device_id"
+    bin ||--o{ loan : "bin_id"
+
     app_user ||--o{ device : "created_by_user_id"
     device_status ||--o{ device : "device_status_id"
     device_type ||--o{ device : "device_type_id"
@@ -267,8 +279,6 @@ erDiagram
     device ||--o{ action_log : "device_record_id"
     user_action_type ||--o{ action_log : "user_action_type_id"
 
-    device ||--o{ bin : "device_id"
-    location ||--o{ bin : "location_id"
 </div>
 
 
