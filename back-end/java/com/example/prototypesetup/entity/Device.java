@@ -19,24 +19,45 @@ public class Device {
     @Column(name = "device_id")
     private Long deviceId;
 
-    @Column(name = "status")
-    private String status;
+    @Column(name = "device_name", nullable = false)
+    private String deviceName;
 
-    @Column(name = "type")
-    private String type;
+    @Column(name = "serial_number", nullable = false)
+    private String serialNumber;
 
-    // Foreign key relation to AppUser table
     @ManyToOne
-    @JoinColumn(name = "user_id")
-    private AppUser user;
+    @JoinColumn(name = "device_type_id", nullable = false)
+    private DeviceType type;
+
+    @ManyToOne
+    @JoinColumn(name = "device_status_id", nullable = false)
+    private DeviceStatus status;
+
+    @ManyToOne
+    @JoinColumn(name = "location_id", nullable = false)
+    private Location location;
+
+    @ManyToOne
+    @JoinColumn(name = "created_by_user_id", nullable = false)
+    private AppUser createdBy;
+
+    @Column(name = "created_at", insertable = false, updatable = false)
+    private java.time.LocalDateTime createdAt;
+
+    @Column(name = "updated_at", insertable = false, updatable = false)
+    private java.time.LocalDateTime updatedAt;
 
     @Override
     public String toString() {
         return "Device{" +
                 "deviceId=" + deviceId +
-                ", status='" + status + '\'' +
-                ", type='" + type + '\'' +
-                ", user=" + (user != null ? user.getUsername() : "null") +
+                ", deviceName='" + deviceName + '\'' +
+                ", type=" + (type != null ? type.getDeviceTypeName() : "null") +
+                ", status=" + (status != null ? status.getStatusName() : "null") +
+                ", location=" + (location != null ? location.getLocationName() : "null") +
+                ", createdBy=" + (createdBy != null ? createdBy.getFullName() : "null") +
                 '}';
     }
 }
+
+

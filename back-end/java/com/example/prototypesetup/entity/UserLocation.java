@@ -1,36 +1,29 @@
 package com.example.prototypesetup.entity;
 
-
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Table(name = "user_location")
 public class UserLocation {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long userLocationId;
+
+    @EmbeddedId
+    private UserLocationId id;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @MapsId("userId")
+    @JoinColumn(name = "user_id")
     private AppUser user;
 
     @ManyToOne
-    @JoinColumn(name = "location_id", nullable = false)
+    @MapsId("locationId")
+    @JoinColumn(name = "location_id")
     private Location location;
-
-    private LocalDateTime assignedAt = LocalDateTime.now();
-
-    // Getters and setters
-    public Long getUserLocationId() { return userLocationId; }
-    public void setUserLocationId(Long userLocationId) { this.userLocationId = userLocationId; }
-
-    public AppUser getUser() { return user; }
-    public void setUser(AppUser user) { this.user = user; }
-
-    public Location getLocation() { return location; }
-    public void setLocation(Location location) { this.location = location; }
-
-    public LocalDateTime getAssignedAt() { return assignedAt; }
-    public void setAssignedAt(LocalDateTime assignedAt) { this.assignedAt = assignedAt; }
 }
