@@ -24,6 +24,7 @@ const HelpModal = ({ open, onClose }) => {
           overflow: "auto",
           boxShadow: 24,
           outline: "none",
+          "&::-webkit-scrollbar": { display: "none" },
         }}
       >
         <Box
