@@ -2,13 +2,14 @@ import { AppBar, Toolbar, IconButton, Box, Link } from "@mui/material";
 import SettingsOutlined from "@mui/icons-material/SettingsOutlined";
 import AccountCircleOutlined from "@mui/icons-material/AccountCircleOutlined";
 import { useAuth } from "../context/MockAuth";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import HelpModal from "../components/HelpModal"; 
 
 
 const NavBar = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const role = user?.role || "Citizen";
   const location = useLocation();
 
@@ -123,6 +124,9 @@ const NavBar = () => {
               sx={{
                 fontSize: 30,
                 fontWeight: "bold",
+              }}
+              onClick={() => {
+                navigate('/signIn')
               }}
             >
               LOGIN
