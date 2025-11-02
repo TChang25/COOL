@@ -54,7 +54,10 @@ const DeviceAvailabilityTable = ({
           </Button>
           <Button
             varianttype="check"
-            onClick={() => console.log("Check Out:", device.name)}
+            onClick={() => {
+              console.log("Check In:", device.name)
+              navigate('/DeviceCheckOut')
+            }}
           >
             Check Out
           </Button>
