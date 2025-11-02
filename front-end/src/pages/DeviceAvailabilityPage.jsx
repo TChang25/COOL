@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { locations } from "../data/mockData"; // 👈 import from your mockData
+import { centers } from "../data/mockData"; // 👈 import from your mockData
 import DeviceAvailabilityTable from "../components/DeviceAvailabilityTable";
 import { Box, Typography } from "@mui/material";
 import Button from "../components/Button";
@@ -58,7 +58,7 @@ const DeviceAvailabilityPage = () => {
 
         {/* 🔹 Filter for Center */}
         <FilterCenter
-          centers={locations.map((name) => ({ name }))}
+          centers={centers.map((c) => ({ name: c.name }))} // instead of locations.map
           value={selectedCenter}
           onChange={handleCenterChange}
         />
