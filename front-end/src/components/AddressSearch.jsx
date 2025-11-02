@@ -42,11 +42,11 @@ const AddressSearch = ({ onSearch, initialAddress = "" }) => {
       // ignore and send to default address or demo address
     }
     // Local demo for address “1234 Goldenrod Street” so it will work without an API call.
-    const q = query.toLowerCase();
-    if (q.includes("1234 goldenrod")) return { lat: 28.5386, lng: -81.3853 };
+    // const q = query.toLowerCase();
+    // if (q.includes("1234 goldenrod")) return { lat: 28.5386, lng: -81.3853 };
 
     // City center default (Orlando)
-    return { lat: 28.53833, lng: -81.37924 };
+    // return { lat: 28.53833, lng: -81.37924 };
   }
 
   // provides data to NearestCenterInfoBox component through onSearch
@@ -77,7 +77,7 @@ const AddressSearch = ({ onSearch, initialAddress = "" }) => {
         py: 1,
         display: "flex",
         alignItems: "center",
-        maxWidth: 565,
+        width: 565,
         mx: "auto",
       }}
     >
@@ -89,7 +89,7 @@ const AddressSearch = ({ onSearch, initialAddress = "" }) => {
       {/* The text input where the user enters the address */}
       <InputBase
         fullWidth // makes the input expand to fill all available horizontal space
-        placeholder="1234 Goldenrod Street" // placeholer text, can be changed to something else
+        placeholder="Enter an Address to Find a Nearby Center" // placeholer text, can be changed to something else
         inputProps={{ "aria-label": "search address" }} // provides an name for screen readers (accessibility)
         value={value} // binds the input box to React state
         onChange={(e) => setValue(e.target.value)} // updates state when the user types
