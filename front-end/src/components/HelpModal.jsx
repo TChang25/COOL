@@ -1,11 +1,20 @@
 import CloseIcon from "@mui/icons-material/Close";
-
-import { Box, IconButton, List, ListItem } from "@mui/material";
+import { Modal, Box, IconButton, List, ListItem } from "@mui/material";
 import { Link } from "react-router-dom";
 
-const HelpModal = () => {
+const HelpModal = ({ open, onClose }) => {
   return (
-    <>
+    <Modal
+      open={open}
+      onClose={onClose}
+      aria-labelledby="help-modal"
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        backdropFilter: "blur(3px)",
+      }}
+    >
       <Box
         sx={{
           width: 1200,
@@ -13,6 +22,8 @@ const HelpModal = () => {
           position: "relative",
           backgroundColor: "rgba(146, 193, 233, 1)",
           overflow: "auto",
+          boxShadow: 24,
+          outline: "none",
         }}
       >
         <Box
@@ -28,11 +39,16 @@ const HelpModal = () => {
             edge="start"
             color="black"
             aria-label="close"
+            onClick={onClose} // ✅ closes modal
             sx={{ mr: 2, position: "absolute", top: 0, right: 0 }}
           >
-            <CloseIcon fontSize="large" sx={{ fontSize: 55, stroke: "black", strokeWidth: 0.25 }} />
+            <CloseIcon
+              fontSize="large"
+              sx={{ fontSize: 55, stroke: "black", strokeWidth: 0.25 }}
+            />
           </IconButton>
         </Box>
+
         <Box
           sx={{
             display: "flex",
@@ -63,9 +79,9 @@ const HelpModal = () => {
             >
               <b>Check Eligibility</b>
               <br />
-              A person must be a City of Orlando resident to check out a device. Even though an
-              address may say Orlando, it might be in unincorporated Orange County or another nearby
-              city.
+              A person must be a City of Orlando resident to check out a device.
+              Even though an address may say Orlando, it might be in
+              unincorporated Orange County or another nearby city.
               <br />
               <br />
               <Link
@@ -80,6 +96,7 @@ const HelpModal = () => {
               </Link>
             </Box>
           </Box>
+
           <Box sx={{ display: "flex", width: "100%" }}>
             <Box
               sx={{
@@ -108,12 +125,7 @@ const HelpModal = () => {
                   "& .MuiListItem-root": { display: "list-item" },
                 }}
               >
-                <ListItem
-                  sx={{
-                    margin: 0,
-                    padding: 0,
-                  }}
-                >
+                <ListItem sx={{ margin: 0, padding: 0 }}>
                   <Link
                     to="https://www.orlando.gov/Parks-the-Environment/Directory/Dr.-James-R.-Smith-Neighborhood-Center"
                     target="_blank"
@@ -122,12 +134,7 @@ const HelpModal = () => {
                     Dr. James R. Smith Neighborhood Center
                   </Link>
                 </ListItem>
-                <ListItem
-                  sx={{
-                    margin: 0,
-                    padding: 0,
-                  }}
-                >
+                <ListItem sx={{ margin: 0, padding: 0 }}>
                   <Link
                     to="https://www.orlando.gov/Parks-the-Environment/Directory/Engelwood-Neighborhood-Center"
                     target="_blank"
@@ -136,12 +143,7 @@ const HelpModal = () => {
                     Engelwood Neighborhood Center
                   </Link>
                 </ListItem>
-                <ListItem
-                  sx={{
-                    margin: 0,
-                    padding: 0,
-                  }}
-                >
+                <ListItem sx={{ margin: 0, padding: 0 }}>
                   <Link
                     to="https://www.orlando.gov/Parks-the-Environment/Directory/Jackson-Neighborhood-Center"
                     target="_blank"
@@ -150,12 +152,7 @@ const HelpModal = () => {
                     John H. Jackson Neighborhood Center
                   </Link>
                 </ListItem>
-                <ListItem
-                  sx={{
-                    margin: 0,
-                    padding: 0,
-                  }}
-                >
+                <ListItem sx={{ margin: 0, padding: 0 }}>
                   <Link
                     to="https://www.orlando.gov/Parks-the-Environment/Directory/Rosemont-Neighborhood-Center-and-Pool"
                     target="_blank"
@@ -164,12 +161,7 @@ const HelpModal = () => {
                     Rosemont Neighborhood Center
                   </Link>
                 </ListItem>
-                <ListItem
-                  sx={{
-                    margin: 0,
-                    padding: 0,
-                  }}
-                >
+                <ListItem sx={{ margin: 0, padding: 0 }}>
                   <Link
                     to="https://www.orlando.gov/Parks-the-Environment/Directory/L.-Claudia-Allen-Senior-Center"
                     target="_blank"
@@ -178,26 +170,16 @@ const HelpModal = () => {
                     L. Claudia Allen Senior Center
                   </Link>
                 </ListItem>
-                <ListItem
-                  sx={{
-                    margin: 0,
-                    padding: 0,
-                  }}
-                >
+                <ListItem sx={{ margin: 0, padding: 0 }}>
                   <Link
                     to="https://www.orlando.gov/Our-Government/Departments-Offices/Executive-Offices/Communications-and-Neighborhood-Relations/Neighborhood-Relations/Hispanic-Office-For-Local-Assistance-HOLA"
                     target="_blank"
                     style={{ textDecoration: "underline", color: "black" }}
                   >
-                    Hispanic Office for Local Aassistance (HOLA)
+                    Hispanic Office for Local Assistance (HOLA)
                   </Link>
                 </ListItem>
-                <ListItem
-                  sx={{
-                    margin: 0,
-                    padding: 0,
-                  }}
-                >
+                <ListItem sx={{ margin: 0, padding: 0 }}>
                   <Link
                     to="https://www.orlando.gov/Parks-the-Environment/Directory/Hankins-Park-Neighborhood-Center"
                     target="_blank"
@@ -206,12 +188,7 @@ const HelpModal = () => {
                     Dr. I Sylvester Hankins Park Neighborhood Center
                   </Link>
                 </ListItem>
-                <ListItem
-                  sx={{
-                    margin: 0,
-                    padding: 0,
-                  }}
-                >
+                <ListItem sx={{ margin: 0, padding: 0 }}>
                   <Link
                     to="https://www.orlando.gov/Parks-the-Environment/Directory/Callahan-Neighborhood-Center"
                     target="_blank"
@@ -220,12 +197,7 @@ const HelpModal = () => {
                     Callahan Neighborhood Center
                   </Link>
                 </ListItem>
-                <ListItem
-                  sx={{
-                    margin: 0,
-                    padding: 0,
-                  }}
-                >
+                <ListItem sx={{ margin: 0, padding: 0 }}>
                   <Link
                     to="https://www.orlando.gov/Parks-the-Environment/Directory/Northwest-Neighborhood-Center"
                     target="_blank"
@@ -234,12 +206,7 @@ const HelpModal = () => {
                     Northwest Neighborhood Center
                   </Link>
                 </ListItem>
-                <ListItem
-                  sx={{
-                    margin: 0,
-                    padding: 0,
-                  }}
-                >
+                <ListItem sx={{ margin: 0, padding: 0 }}>
                   <Link
                     to="https://www.orlando.gov/Parks-the-Environment/Directory/Dover-Shores-Neighborhood-Center"
                     target="_blank"
@@ -248,12 +215,7 @@ const HelpModal = () => {
                     Dover Shores Neighborhood Center
                   </Link>
                 </ListItem>
-                <ListItem
-                  sx={{
-                    margin: 0,
-                    padding: 0,
-                  }}
-                >
+                <ListItem sx={{ margin: 0, padding: 0 }}>
                   <Link
                     to="https://www.orlando.gov/Parks-the-Environment/Directory/Grand-Avenue-Park"
                     target="_blank"
@@ -262,12 +224,7 @@ const HelpModal = () => {
                     Grand Avenue Neighborhood Center
                   </Link>
                 </ListItem>
-                <ListItem
-                  sx={{
-                    margin: 0,
-                    padding: 0,
-                  }}
-                >
+                <ListItem sx={{ margin: 0, padding: 0 }}>
                   <Link
                     to="https://www.orlando.gov/Parks-the-Environment/Directory/Ivey-Lane-Neighborhood-Center"
                     target="_blank"
@@ -276,12 +233,7 @@ const HelpModal = () => {
                     Ivey Lane Neighborhood Center
                   </Link>
                 </ListItem>
-                <ListItem
-                  sx={{
-                    margin: 0,
-                    padding: 0,
-                  }}
-                >
+                <ListItem sx={{ margin: 0, padding: 0 }}>
                   <Link
                     to="https://www.orlando.gov/Parks-the-Environment/Directory/Langford-Neighborhood-Center"
                     target="_blank"
@@ -290,12 +242,7 @@ const HelpModal = () => {
                     Langford Neighborhood Center
                   </Link>
                 </ListItem>
-                <ListItem
-                  sx={{
-                    margin: 0,
-                    padding: 0,
-                  }}
-                >
+                <ListItem sx={{ margin: 0, padding: 0 }}>
                   <Link
                     to="https://www.orlando.gov/Parks-the-Environment/Directory/Rock-Lake-Neighborhood-Center"
                     target="_blank"
@@ -304,12 +251,7 @@ const HelpModal = () => {
                     Rock Lake Neighborhood Center
                   </Link>
                 </ListItem>
-                <ListItem
-                  sx={{
-                    margin: 0,
-                    padding: 0,
-                  }}
-                >
+                <ListItem sx={{ margin: 0, padding: 0 }}>
                   <Link
                     to="https://www.orlando.gov/Parks-the-Environment/Directory/Wadeview-Neighborhood-Center"
                     target="_blank"
@@ -318,26 +260,16 @@ const HelpModal = () => {
                     Wadeview Neighborhood Center
                   </Link>
                 </ListItem>
-                <ListItem
-                  sx={{
-                    margin: 0,
-                    padding: 0,
-                  }}
-                >
+                <ListItem sx={{ margin: 0, padding: 0 }}>
                   <Link
                     to="https://www.orlando.gov/Parks-the-Environment/Directory/Citrus-Square-Neighborhood-Center"
                     target="_blank"
                     style={{ textDecoration: "underline", color: "black" }}
                   >
-                    Citrus Square Neighborhood Center{" "}
+                    Citrus Square Neighborhood Center
                   </Link>
                 </ListItem>
-                <ListItem
-                  sx={{
-                    margin: 0,
-                    padding: 0,
-                  }}
-                >
+                <ListItem sx={{ margin: 0, padding: 0 }}>
                   <Link
                     to="https://www.orlando.gov/Our-Government/Departments-Offices/Executive-Offices/CAO/RISE-Employment-Training-Program"
                     target="_blank"
@@ -349,6 +281,7 @@ const HelpModal = () => {
               </List>
             </Box>
           </Box>
+
           <Box sx={{ display: "flex", width: "100%" }}>
             <Box
               sx={{
@@ -370,10 +303,11 @@ const HelpModal = () => {
             >
               <b>Visit Location to Check Out Device</b>
               <br />
-              Neighborhood Center staff will need a Drivers License or mail to verify City of
-              Orlando address. You have two weeks to utilize the device before it must be returned.
-              If you need additional time, you must return the device and re-check it out at the
-              same location.
+              Neighborhood Center staff will need a Drivers License or mail to
+              verify City of Orlando address. You have two weeks to utilize the
+              device before it must be returned. If you need additional time,
+              you must return the device and re-check it out at the same
+              location.
               <br />
               <br />
               Rules for Check Out:
@@ -384,57 +318,34 @@ const HelpModal = () => {
                   "& .MuiListItem-root": { display: "list-item" },
                 }}
               >
-                <ListItem
-                  sx={{
-                    marginLeft: 5,
-                    padding: 0,
-                  }}
-                >
-                  Any verified Resident of the City of Orlando may checkout a Device. (MUST be 18 or
-                  Older to check out a device)
+                <ListItem sx={{ marginLeft: 5, padding: 0 }}>
+                  Any verified Resident of the City of Orlando may checkout a
+                  Device. (MUST be 18 or Older to check out a device)
                 </ListItem>
-                <ListItem
-                  sx={{
-                    marginLeft: 5,
-                    padding: 0,
-                  }}
-                >
-                  Devices can be checked out for up to 14 days and MUST be returned to the same
-                  location they were checked out from during each locations normal operating hours.
+                <ListItem sx={{ marginLeft: 5, padding: 0 }}>
+                  Devices can be checked out for up to 14 days and MUST be
+                  returned to the same location they were checked out from
+                  during each location's normal operating hours.
                 </ListItem>
-                <ListItem
-                  sx={{
-                    marginLeft: 5,
-                    padding: 0,
-                  }}
-                >
-                  Returning a device damaged or not at all, may result in suspension of the
-                  households Device Checkout privileges.
+                <ListItem sx={{ marginLeft: 5, padding: 0 }}>
+                  Returning a device damaged or not at all may result in
+                  suspension of the household's Device Checkout privileges.
                 </ListItem>
-                <ListItem
-                  sx={{
-                    marginLeft: 5,
-                    padding: 0,
-                  }}
-                >
-                  Content filtering is always On and will prohibit access to inappropriate sites.
-                  Parents/Guardians are still responsible for monitoring device usage of minors.
+                <ListItem sx={{ marginLeft: 5, padding: 0 }}>
+                  Content filtering is always On and will prohibit access to
+                  inappropriate sites. Parents/Guardians are still responsible
+                  for monitoring device usage of minors.
                 </ListItem>
-                <ListItem
-                  sx={{
-                    marginLeft: 5,
-                    padding: 0,
-                  }}
-                >
+                <ListItem sx={{ marginLeft: 5, padding: 0 }}>
                   Each Household may checkout 1 of each device type.
                 </ListItem>
               </List>
             </Box>
           </Box>
+
           <Box sx={{ display: "flex", width: "100%" }}>
             <Box
               sx={{
-                // textAlign: "top",
                 padding: "0px 50px 5px 50px",
                 fontSize: 86,
                 color: "black",
@@ -451,13 +362,14 @@ const HelpModal = () => {
               }}
             >
               <b>Sign Lending Agreement</b>
-              <br />A Lending Agreement Form is required to be signed for each device checked out. A
-              staff member will provide this form during the check out process.
+              <br />A Lending Agreement Form is required to be signed for each
+              device checked out. A staff member will provide this form during
+              the check out process.
             </Box>
           </Box>
         </Box>
       </Box>
-    </>
+    </Modal>
   );
 };
 

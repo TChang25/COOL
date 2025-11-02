@@ -3,11 +3,17 @@ import SettingsOutlined from "@mui/icons-material/SettingsOutlined";
 import AccountCircleOutlined from "@mui/icons-material/AccountCircleOutlined";
 import { useAuth } from "../context/MockAuth";
 import { useLocation } from "react-router-dom";
+import { useState } from "react";
+import HelpModal from "../components/HelpModal"; 
+
 
 const NavBar = () => {
   const { user } = useAuth();
   const role = user?.role || "Citizen";
   const location = useLocation();
+
+  const [helpOpen, setHelpOpen] = useState(false);
+
 
   // ✅ Show top bar on landing *and* sign-in pages
   const showTopBar =
@@ -106,6 +112,7 @@ const NavBar = () => {
                 fontSize: 30,
                 fontWeight: "bold",
               }}
+              onClick={() => setHelpOpen(true)}
             >
               HELP
             </Link>
@@ -152,6 +159,8 @@ const NavBar = () => {
 
       {/* 🔄 Show role-based navbar for all other pages */}
       {!showTopBar && renderNavbar()}
+      <HelpModal open={helpOpen} onClose={() => setHelpOpen(false)} />
+
     </>
   );
 };
