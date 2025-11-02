@@ -13,12 +13,14 @@ import {
 import Button from "./Button";
 import { devices } from "../data/mockData";
 import { useAuth } from "../context/MockAuth";
+import { useNavigate } from "react-router-dom";
 
 const DeviceAvailabilityTable = ({
   selectedCenter = "", // 🟢 Added default values so props never break
   selectedFilter = "All",
 }) => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const role = user?.role || "Citizen";
 
   // 🧮 Safe filtering logic
@@ -43,7 +45,10 @@ const DeviceAvailabilityTable = ({
         <Box sx={{ display: "flex", gap: 1 }}>
           <Button
             varianttype="check"
-            onClick={() => console.log("Check In:", device.name)}
+            onClick={() => {
+              console.log("Check In:", device.name)
+              navigate('/DeviceCheckIn')
+            }}
           >
             Check In
           </Button>
