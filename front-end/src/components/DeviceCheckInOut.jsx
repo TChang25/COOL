@@ -1,20 +1,15 @@
-import React, { useState} from "react";
+import React, { useState } from "react";
 import { Box, MenuItem, TextField, Typography } from "@mui/material";
-import bgImage from "/src/assets/The_City_beautiful.jpg";
 import Button from "./Button";
-import { Link } from "react-router-dom";
-import { useAuth } from "../context/MockAuth";
 import { useNavigate } from "react-router-dom";
 import WhiteTextField from "./WhiteTextField";
 import WhiteSelectField from "./WhiteSelectField";
-import { locations } from "../data/mockData";
-import { users } from "../data/mockData";
 import WhiteCheckbox from "./WhiteCheckBox";
-import FormGroup from '@mui/material/FormGroup';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import FormLabel from '@mui/material/FormLabel';
+import FormGroup from "@mui/material/FormGroup";
 import WhiteFormControlLabel from "./WhiteFormControlLabel";
 import WhiteFormLabel from "./WhiteFormLabel";
+import { users, centers } from "../data/mockData"; // ✅ keep this import only
+
 const Checkout = ({ handleSubmit, formData, handleChange, error }) => {
   return (
     <Box
@@ -22,12 +17,13 @@ const Checkout = ({ handleSubmit, formData, handleChange, error }) => {
       onSubmit={handleSubmit}
       sx={{ display: "flex", flexDirection: "column", gap: 5 }}
     >
-      <Typography 
-        variant="h2" 
+      <Typography
+        variant="h2"
         sx={{
           color: "white",
-          textAlign: "center"
-      }}>
+          textAlign: "center",
+        }}
+      >
         Device Check-Out
       </Typography>
 
@@ -41,14 +37,11 @@ const Checkout = ({ handleSubmit, formData, handleChange, error }) => {
         error={!!error}
         helperText={error}
       >
-        { 
-          locations.map((location, index) => {
-            let temp = location.split(" ")[0];
-            return (
-            <MenuItem key={index} value={temp}>{temp}</MenuItem>
-            );
-          })
-        }
+        {centers.map((center, index) => (
+          <MenuItem key={index} value={center.name}>
+            {center.name}
+          </MenuItem>
+        ))}
       </WhiteSelectField>
       <WhiteSelectField
         label="Employee Name"
@@ -60,14 +53,14 @@ const Checkout = ({ handleSubmit, formData, handleChange, error }) => {
         error={!!error}
         helperText={error}
       >
-        { 
-          users.map((user, index) => {
-            let temp = user.name;
-            return (
-            <MenuItem key={index} value={temp}>{temp}</MenuItem>
-            );
-          })
-        }
+        {users.map((user, index) => {
+          let temp = user.name;
+          return (
+            <MenuItem key={index} value={temp}>
+              {temp}
+            </MenuItem>
+          );
+        })}
       </WhiteSelectField>
       <WhiteSelectField
         label="Bin Type"
@@ -129,7 +122,7 @@ const Checkout = ({ handleSubmit, formData, handleChange, error }) => {
         Check-out
       </Button>
     </Box>
-  )
+  );
 }
 
 const CheckIn = ({ handleSubmit, formData, handleChange, error }) => {
@@ -139,12 +132,13 @@ const CheckIn = ({ handleSubmit, formData, handleChange, error }) => {
       onSubmit={handleSubmit}
       sx={{ display: "flex", flexDirection: "column", gap: 5 }}
     >
-      <Typography 
-        variant="h2" 
+      <Typography
+        variant="h2"
         sx={{
           color: "white",
-          textAlign: "center"
-      }}>
+          textAlign: "center",
+        }}
+      >
         Device Check-In
       </Typography>
 
@@ -158,14 +152,11 @@ const CheckIn = ({ handleSubmit, formData, handleChange, error }) => {
         error={!!error}
         helperText={error}
       >
-        { 
-          locations.map((location, index) => {
-            let temp = location.split(" ")[0];
-            return (
-            <MenuItem key={index} value={temp}>{temp}</MenuItem>
-            );
-          })
-        }
+        {centers.map((center, index) => (
+          <MenuItem key={index} value={center.name}>
+            {center.name}
+          </MenuItem>
+        ))}
       </WhiteSelectField>
       <WhiteSelectField
         label="Employee Name"
@@ -177,14 +168,14 @@ const CheckIn = ({ handleSubmit, formData, handleChange, error }) => {
         error={!!error}
         helperText={error}
       >
-        { 
-          users.map((user, index) => {
-            let temp = user.name;
-            return (
-            <MenuItem key={index} value={temp}>{temp}</MenuItem>
-            );
-          })
-        }
+        {users.map((user, index) => {
+          let temp = user.name;
+          return (
+            <MenuItem key={index} value={temp}>
+              {temp}
+            </MenuItem>
+          );
+        })}
       </WhiteSelectField>
       <WhiteSelectField
         label="Bin Type"
@@ -233,13 +224,58 @@ const CheckIn = ({ handleSubmit, formData, handleChange, error }) => {
         fullWidth
         error={!!error}
       />
-      <FormGroup>
-        <WhiteFormLabel component="legend">Device Return Checklist</WhiteFormLabel>
-        <WhiteFormControlLabel control={<WhiteCheckbox/>}label="Noticeable Damage?"/> 
-        <WhiteFormControlLabel control={<WhiteCheckbox/>}label="All accessories returned?"/> 
-        <WhiteFormControlLabel control={<WhiteCheckbox/>}label="Resident first offense?"/> 
-        <WhiteFormControlLabel control={<WhiteCheckbox/>}label="Does device turn on?"/> 
+      <FormGroup
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 2, // space between label and grid
+          alignItems: "center", // centers everything horizontally
+        }}
+      >
+        {/* Label on its own line */}
+        <WhiteFormLabel
+          component="legend"
+          sx={{
+            color: "white",
+            fontWeight: "bold",
+            fontSize: "1.1rem",
+            marginBottom: "8px",
+            textAlign: "center", // ✅ label centered
+          }}
+        >
+          Device Return Checklist
+        </WhiteFormLabel>
+
+        {/* Centered 2-column grid */}
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: 1.5,
+            justifyContent: "center", // ✅ centers the grid itself
+            alignItems: "center",
+            width: "fit-content", // ✅ keeps grid tight around content
+          }}
+        >
+          <WhiteFormControlLabel
+            control={<WhiteCheckbox />}
+            label="Noticeable Damage?"
+          />
+          <WhiteFormControlLabel
+            control={<WhiteCheckbox />}
+            label="All accessories returned?"
+          />
+          <WhiteFormControlLabel
+            control={<WhiteCheckbox />}
+            label="Resident first offense?"
+          />
+          <WhiteFormControlLabel
+            control={<WhiteCheckbox />}
+            label="Does device turn on?"
+          />
+        </Box>
       </FormGroup>
+
       <WhiteTextField
         label="Reason for damage?"
         name="residentDamageReason"
@@ -262,7 +298,7 @@ const CheckIn = ({ handleSubmit, formData, handleChange, error }) => {
         Check-In
       </Button>
     </Box>
-  )
+  );
 }
 
 const DeviceCheckInOut = ({checkType}) => {
@@ -271,9 +307,18 @@ const DeviceCheckInOut = ({checkType}) => {
 
   
   const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
+  checkoutLocation: "",
+  employeeName: "",
+  binType: "",
+  binNumber: "",
+  residentName: "",
+  residentPhoneNumber: "",
+  residentAddress: "",
+  residentCheckoutReason: "",
+  residentDamageReason: "",
+  residentNotes: "",
+});
+
   
    const [error, setError] = useState("");
   
@@ -307,7 +352,7 @@ const DeviceCheckInOut = ({checkType}) => {
         justifyContent: "center",
         flexDirection: "column",
         backgroundColor: "#002D72",
-        width: "60%",
+        width: "30%",
         padding: "50px",
         textAlign: "center",
       }}
