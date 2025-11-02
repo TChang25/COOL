@@ -76,12 +76,58 @@ export const users = [
 // ---------------------------
 // LOCATIONS
 // ---------------------------
-export const locations = [
-  "Callahan Neighborhood Center",
-  "Engelwood Neighborhood Center",
-  "Jackson Neighborhood Center",
-  "Wadeview Neighborhood Center",
-  "Smith Neighborhood Center",
+// export const locations = [
+//   "Callahan Neighborhood Center",
+//   "Engelwood Neighborhood Center",
+//   "Jackson Neighborhood Center",
+//   "Wadeview Neighborhood Center",
+//   "Smith Neighborhood Center",
+// ];
+
+// ---------------------------
+// LOCATIONS WITH DETAILS
+// ---------------------------
+export const centers = [
+  {
+    id: "callahan",
+    name: "Callahan Neighborhood Center",
+    address: "101 N Parramore Ave, Orlando, FL 32801",
+    phone: "(407) 246-4447",
+    hours: "Mon-Fri 9am-5pm",
+    coords: { lat: 28.545, lng: -81.389 },
+  },
+  {
+    id: "engelwood",
+    name: "Engelwood Neighborhood Center",
+    address: "6123 LaCosta Dr, Orlando, FL 32807",
+    phone: "(407) 246-4447",
+    hours: "Mon-Fri 9am-5pm",
+    coords: { lat: 28.538, lng: -81.305 },
+  },
+  {
+    id: "jackson",
+    name: "Jackson Neighborhood Center",
+    address: "1002 Carter St, Orlando, FL 32805",
+    phone: "(407) 246-4447",
+    hours: "Mon-Fri 9am-5pm",
+    coords: { lat: 28.531, lng: -81.391 },
+  },
+  {
+    id: "wadeview",
+    name: "Wadeview Neighborhood Center",
+    address: "2177 S Summerlin Ave, Orlando, FL 32806",
+    phone: "(407) 246-4468",
+    hours: "Mon-Fri 9am-5pm",
+    coords: { lat: 28.518, lng: -81.368 },
+  },
+  {
+    id: "smith",
+    name: "Smith Neighborhood Center",
+    address: "1723 Bruton Blvd, Orlando, FL 32805",
+    phone: "(407) 246-4459",
+    hours: "Mon-Fri 9am-5pm",
+    coords: { lat: 28.514, lng: -81.417 },
+  },
 ];
 
 // ---------------------------
