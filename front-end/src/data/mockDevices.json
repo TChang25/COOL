@@ -1,0 +1,39 @@
+[
+  {
+    "id": 1,
+    "device": "Laptop",
+    "deviceId": "LB-001",
+    "available": true
+  },
+  {
+    "id": 2,
+    "device": "Tablet",
+    "deviceId": "TB-001",
+    "available": true
+  },
+  {
+    "id": 3,
+    "device": "Hotspot",
+    "deviceId": "HB-001",
+    "available": false
+  },
+  {
+    "id": 4,
+    "device": "Hotspot",
+    "deviceId": "HB-002",
+    "available": false
+  },
+  {
+    "id": 5,
+    "device": "Laptop",
+    "deviceId": "LB-002",
+    "available": false
+  },
+  {
+    "id": 6,
+    "device": "Tablet",
+    "deviceId": "TB-002",
+    "available": true
+  }
+]
+
