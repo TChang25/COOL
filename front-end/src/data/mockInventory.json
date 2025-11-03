@@ -1,0 +1,33 @@
+[
+  {
+    "centerName": "Callahan",
+    "laptops": { "available": 5, "total": 10 },
+    "tablets": { "available": 3, "total": 8 },
+    "hotspots": { "available": 7, "total": 10 }
+  },
+  {
+    "centerName": "Smith",
+    "laptops": { "available": 2, "total": 8 },
+    "tablets": { "available": 6, "total": 8 },
+    "hotspots": { "available": 5, "total": 8 }
+  },
+  {
+    "centerName": "Jackson",
+    "laptops": { "available": 4, "total": 6 },
+    "tablets": { "available": 2, "total": 6 },
+    "hotspots": { "available": 6, "total": 10 }
+  },
+  {
+    "centerName": "Wadeview",
+    "laptops": { "available": 6, "total": 12 },
+    "tablets": { "available": 5, "total": 10 },
+    "hotspots": { "available": 8, "total": 12 }
+  },
+  {
+    "centerName": "Engelwood",
+    "laptops": { "available": 3, "total": 7 },
+    "tablets": { "available": 4, "total": 8 },
+    "hotspots": { "available": 2, "total": 6 }
+  }
+]
+
