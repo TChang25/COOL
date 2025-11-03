@@ -125,6 +125,7 @@ const NavBar = () => {
               HELP
             </Link>
             <Link
+              onClick={() => navigate("/signIn")}
               component="button"
               color="inherit"
               underline="hover"
@@ -148,7 +149,7 @@ const NavBar = () => {
         <AppBar
           position="static"
           elevation={0}
-          sx={{ backgroundColor: "#0072CE" }}
+          sx={{ backgroundColor: "#0072CE", }}
         >
           <Toolbar>
             <Box
