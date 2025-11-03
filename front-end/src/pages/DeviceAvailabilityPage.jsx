@@ -31,10 +31,8 @@ const DeviceAvailabilityPage = () => {
       }}
     >
       <Typography
-        variant="h4"
+        variant="h1"
         sx={{
-          fontWeight: "bold",
-          color: "#2C2C2C",
           mb: 4,
         }}
       >
