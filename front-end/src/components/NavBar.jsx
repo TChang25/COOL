@@ -2,18 +2,17 @@ import { AppBar, Toolbar, IconButton, Box, Link } from "@mui/material";
 import SettingsOutlined from "@mui/icons-material/SettingsOutlined";
 import AccountCircleOutlined from "@mui/icons-material/AccountCircleOutlined";
 import { useAuth } from "../context/MockAuth";
-import { useLocation } from "react-router-dom";
+import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import HelpModal from "../components/HelpModal"; 
-
+import HelpModal from "../components/HelpModal";
 
 const NavBar = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const role = user?.role || "Citizen";
   const location = useLocation();
+  const navigate = useNavigate();
 
   const [helpOpen, setHelpOpen] = useState(false);
-
 
   // ✅ Show top bar on landing *and* sign-in pages
   const showTopBar =
@@ -35,15 +34,17 @@ const NavBar = () => {
               justifyContent: "space-between",
             }}
           >
-            <Box
-              component="img"
-              sx={{
-                padding: "30px",
-                width: 150,
-              }}
-              alt="Fountain Logo"
-              src={"./src/assets/fountainLogo2.png"}
-            />
+            <Link component={RouterLink} to="/">
+              <Box
+                component="img"
+                sx={{
+                  padding: "30px",
+                  width: 150,
+                }}
+                alt="Fountain Logo"
+                src={"./src/assets/fountainLogo2.png"}
+              />
+            </Link>
             <Box
               sx={{
                 display: "flex",
@@ -52,7 +53,7 @@ const NavBar = () => {
                 width: 150,
               }}
             >
-              <IconButton>
+              <IconButton onClick={() => navigate("/admin")}>
                 <SettingsOutlined
                   sx={{
                     color: "white",
@@ -60,7 +61,12 @@ const NavBar = () => {
                   }}
                 />
               </IconButton>
-              <IconButton>
+              <IconButton
+                onClick={() => {
+                  logout(); // clear user
+                  navigate("/"); // go back to landing
+                }}
+              >
                 <AccountCircleOutlined
                   sx={{
                     color: "white",
@@ -87,15 +93,17 @@ const NavBar = () => {
             justifyContent: "space-between",
           }}
         >
-          <Box
-            component="img"
-            sx={{
-              padding: "30px",
-              width: 150,
-            }}
-            alt="Fountain Logo"
-            src={"./src/assets/fountainLogo2.png"}
-          />
+          <Link component={RouterLink} to="/">
+            <Box
+              component="img"
+              sx={{
+                padding: "30px",
+                width: 150,
+              }}
+              alt="Fountain Logo"
+              src={"./src/assets/fountainLogo2.png"}
+            />
+          </Link>
           <Box
             sx={{
               display: "flex",
@@ -117,6 +125,7 @@ const NavBar = () => {
               HELP
             </Link>
             <Link
+              onClick={() => navigate("/signIn")}
               component="button"
               color="inherit"
               underline="hover"
@@ -140,7 +149,7 @@ const NavBar = () => {
         <AppBar
           position="static"
           elevation={0}
-          sx={{ backgroundColor: "#0072CE" }}
+          sx={{ backgroundColor: "#0072CE", }}
         >
           <Toolbar>
             <Box
@@ -160,7 +169,6 @@ const NavBar = () => {
       {/* 🔄 Show role-based navbar for all other pages */}
       {!showTopBar && renderNavbar()}
       <HelpModal open={helpOpen} onClose={() => setHelpOpen(false)} />
-
     </>
   );
 };

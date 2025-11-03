@@ -7,6 +7,7 @@ import DeviceCheckIn from "./pages/DeviceCheckIn";
 import DeviceCheckOut from "./pages/DeviceCheckOut";
 import { Routes, Route } from "react-router-dom";
 import NavBar from "./components/NavBar";
+import Admin from './pages/AdminDashboardPage'
 
 
 function App() {
@@ -18,8 +19,9 @@ function App() {
         <Route path="/signIn" element={<SignInPage />} />
         <Route path="/device" element={<DevicePage />} />
         <Route path="/nearest" element={<NearestPage />} />
-        <Route path="/DeviceCheckIn" element={<DeviceCheckIn/>} />
-        <Route path="/DeviceCheckOut" element={<DeviceCheckOut/>} />
+        <Route path="/DeviceCheckIn" element={<DeviceCheckIn />} />
+        <Route path="/DeviceCheckOut" element={<DeviceCheckOut />} />
+        <Route path="/admin" element={<Admin />} />
       </Routes>
     </>
   );
