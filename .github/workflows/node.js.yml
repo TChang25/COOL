@@ -44,7 +44,7 @@ jobs:
       
     - name: Run tests
       run: npm test
-      working-directory: ./front-end --if-present
+      working-directory: /front-end --if-present
       
     # 2. Setup Pages and Upload the 'dist' folder
     - name: Setup Pages
