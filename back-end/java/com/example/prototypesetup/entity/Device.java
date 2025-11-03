@@ -1,12 +1,14 @@
 package com.example.prototypesetup.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,24 +21,51 @@ public class Device {
     @Column(name = "device_id")
     private Long deviceId;
 
-    @Column(name = "status")
-    private String status;
+    @Column(name = "device_name", nullable = false, length = 150)
+    private String deviceName;
 
-    @Column(name = "type")
-    private String type;
+    @Column(name = "serial_number", nullable = false, unique = true, length = 100)
+    private String serialNumber;
 
-    // Foreign key relation to AppUser table
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private AppUser user;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "device_type_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private DeviceType type;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "device_status_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private DeviceStatus status;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "location_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private Location location;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by_user_id", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private AppUser createdBy;
+
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
     @Override
     public String toString() {
         return "Device{" +
                 "deviceId=" + deviceId +
-                ", status='" + status + '\'' +
-                ", type='" + type + '\'' +
-                ", user=" + (user != null ? user.getUsername() : "null") +
+                ", deviceName='" + deviceName + '\'' +
+                ", type=" + (type != null ? type.getDeviceTypeName() : "null") +
+                ", status=" + (status != null ? status.getStatusName() : "null") +
+                ", location=" + (location != null ? location.getLocationName() : "null") +
+                ", createdBy=" + (createdBy != null ? createdBy.getFullName() : "null") +
                 '}';
     }
 }
+
+

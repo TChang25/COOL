@@ -10,7 +10,7 @@ import { AuthProvider } from "./context/MockAuth.jsx";
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <ThemeProvider theme={theme}>
-      <BrowserRouter>
+      <BrowserRouter basename="/COOL">
         <AuthProvider>
           <App />
         </AuthProvider>

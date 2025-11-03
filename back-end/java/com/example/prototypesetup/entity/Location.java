@@ -1,39 +1,58 @@
 package com.example.prototypesetup.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Table(name = "location")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Location {
 
-    @Id
+      @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "location_id") // maps to MySQL column
-    private Long locationId;
+    @Column(name = "location_id")
+    private Integer locationId;
 
-    @Column(nullable = false, unique = true, length = 100)
+    @Column(name = "location_name", nullable = false, length = 150)
     private String locationName;
 
-    private String address;
+    @Column(name = "street_address", length = 255)
+    private String streetAddress;
 
-    // Prevent infinite recursion when serializing
-    @ManyToMany(mappedBy = "locations")
+    @Column(name = "city", length = 100)
+    private String city;
+
+    @Column(name = "state", length = 2)
+    private String state;
+
+    @Column(name = "zip_code", length = 10)
+    private String zipCode;
+
+    @Column(name = "contact_number", length = 20)
+    private String contactNumber;
+
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    // Relation with AppUser via UserLocationAccess
+    @OneToMany(mappedBy = "location", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
-    private Set<AppUser> users = new HashSet<>();
-
-    // Getters and setters
-    public Long getLocationId() { return locationId; }
-    public void setLocationId(Long locationId) { this.locationId = locationId; }
-
-    public String getLocationName() { return locationName; }
-    public void setLocationName(String locationName) { this.locationName = locationName; }
-
-    public String getAddress() { return address; }
-    public void setAddress(String address) { this.address = address; }
-
-    public Set<AppUser> getUsers() { return users; }
-    public void setUsers(Set<AppUser> users) { this.users = users; }
+    private Set<UserLocationAccess> userAccessList = new HashSet<>();
 }
