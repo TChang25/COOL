@@ -1,5 +1,5 @@
 import React, {useState} from 'react'
-import {Box} from "@mui/material"
+import {Box, Typography} from "@mui/material"
 import NearestCenterInfoBox from '../components/NearestCenterInfoBox'
 import AddressSearch from '../components/AddressSearch'
 
@@ -7,7 +7,7 @@ function NearestCenterPage() {
   const [userCoords, setUserCoords] = useState(null);
 
   return (
-        <Box
+    <Box
       sx={{
         minHeight: "100vh",
         width: "100vw",
@@ -18,19 +18,25 @@ function NearestCenterPage() {
         paddingTop: "60px",
       }}
     >
-
-        <AddressSearch 
-        onSearch={({coords}) => setUserCoords(coords)}
-        initialAddress=""/>        
+      {/* 🔹 Page Title */}
+      <Typography
+        variant="h1"
+        sx={{
+          mb: 4,
+        }}
+      >
+        Nearest Center
+      </Typography>
+      <AddressSearch
+        onSearch={({ coords }) => setUserCoords(coords)}
+        initialAddress=""
+      />
 
       <div style={{ marginTop: 16 }}>
         <NearestCenterInfoBox userCoords={userCoords} />
       </div>
-       
     </Box>
-   
-
-  )
+  );
 }
 
 export default NearestCenterPage
