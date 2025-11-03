@@ -5,6 +5,8 @@ import { useAuth } from "../context/MockAuth";
 import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import HelpModal from "../components/HelpModal";
+import fullLogo from "../assets/fullCityLogo.png"
+import fountainLogo from "../assets/fountainLogo2.png"
 
 const NavBar = () => {
   const { user, logout } = useAuth();
@@ -42,7 +44,7 @@ const NavBar = () => {
                   width: 150,
                 }}
                 alt="Fountain Logo"
-                src={"./src/assets/fountainLogo2.png"}
+                src={fountainLogo}
               />
             </Link>
             <Box
@@ -101,7 +103,7 @@ const NavBar = () => {
                 width: 150,
               }}
               alt="Fountain Logo"
-              src={"./src/assets/fountainLogo2.png"}
+              src={fountainLogo}
             />
           </Link>
           <Box
@@ -160,7 +162,7 @@ const NavBar = () => {
                 margin: "auto",
               }}
               alt="City of Orlando Logo"
-              src={"./src/assets/fullCityLogo.png"}
+              src={fullLogo}
             />
           </Toolbar>
         </AppBar>
