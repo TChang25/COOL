@@ -2,14 +2,15 @@ import { AppBar, Toolbar, IconButton, Box, Link } from "@mui/material";
 import SettingsOutlined from "@mui/icons-material/SettingsOutlined";
 import AccountCircleOutlined from "@mui/icons-material/AccountCircleOutlined";
 import { useAuth } from "../context/MockAuth";
-import { Link as RouterLink, useLocation } from "react-router-dom";
+import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import HelpModal from "../components/HelpModal";
 
 const NavBar = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const role = user?.role || "Citizen";
   const location = useLocation();
+  const navigate = useNavigate();
 
   const [helpOpen, setHelpOpen] = useState(false);
 
@@ -52,7 +53,7 @@ const NavBar = () => {
                 width: 150,
               }}
             >
-              <IconButton>
+              <IconButton onClick={() => navigate("/admin")}>
                 <SettingsOutlined
                   sx={{
                     color: "white",
@@ -60,7 +61,12 @@ const NavBar = () => {
                   }}
                 />
               </IconButton>
-              <IconButton>
+              <IconButton
+                onClick={() => {
+                  logout(); // clear user
+                  navigate("/"); // go back to landing
+                }}
+              >
                 <AccountCircleOutlined
                   sx={{
                     color: "white",
