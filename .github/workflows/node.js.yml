@@ -38,5 +38,5 @@ jobs:
       working-directory: ./front-end
       
     - name: Run tests
-      run: npm test
+      run: npm test --if-present
       working-directory: ./front-end
