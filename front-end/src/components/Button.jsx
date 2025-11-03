@@ -85,7 +85,7 @@ const StyledButton = styled(MUIButton)(({ theme, varianttype }) => ({
   }),
 }));
 
-const Button = ({ children, varianttype = "primary", route, onClick }) => {
+const Button = ({ children, varianttype = "primary", route, onClick, type }) => {
   const navigate = useNavigate();
 
   const handleClick = () => {
@@ -98,6 +98,7 @@ const Button = ({ children, varianttype = "primary", route, onClick }) => {
 
   return (
     <StyledButton
+      type={type}
       varianttype={varianttype}
       onClick={handleClick}
       disableElevation

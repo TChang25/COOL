@@ -1,0 +1,30 @@
+{
+  "months": [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December"
+  ],
+  "stats": {
+    "March": {
+      "pieChart": {
+        "available": 75,
+        "unavailable": 25
+      },
+      "barChart": {
+        "laptops": 30,
+        "hotspots": 50,
+        "tablets": 80
+      }
+    }
+  }
+}
+

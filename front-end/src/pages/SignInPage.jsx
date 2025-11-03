@@ -3,14 +3,22 @@ import { Box, TextField } from "@mui/material";
 import bgImage from "/src/assets/The_City_beautiful.jpg";
 import Button from "../components/Button";
 import { Link } from "react-router-dom";
+import { useAuth } from "../context/MockAuth";
+import { useNavigate } from "react-router-dom";
+
 
 const SignInPage = () => {
 
+  const { login } = useAuth();
+  const navigate = useNavigate();
+
+
 const [formData, setFormData] = useState({
-  name: "",
   email: "",
+  password: "",
 });
   
+   const [error, setError] = useState("");
   
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -18,12 +26,20 @@ const [formData, setFormData] = useState({
       ...prevState,
       [name]: value,
     }));
+    setError(""); // clear error when user types again
   };
 
     const handleSubmit = (e) => {
     e.preventDefault();
     console.log(formData);
-    // Add form submission logic here
+     const { success, user } = login(formData.email, formData.password);
+
+     if (success) {
+       setError("");
+       navigate("/device"); // 👈 everyone lands here
+     } else {
+         setError("Invalid email or password.");
+     }
   };
 
   return (
@@ -64,6 +80,7 @@ const [formData, setFormData] = useState({
             value={formData.email}
             onChange={handleChange}
             fullWidth
+            error={!!error}
             sx={{
               "& .MuiOutlinedInput-root": {
                 borderRadius: "5px",
@@ -76,6 +93,8 @@ const [formData, setFormData] = useState({
             value={formData.password}
             onChange={handleChange}
             fullWidth
+            error={!!error}
+            helperText={error}
             sx={{
               "& .MuiOutlinedInput-root": {
                 borderRadius: "5px",
@@ -85,6 +104,8 @@ const [formData, setFormData] = useState({
           <Button type="submit" varianttype="sign">
             Sign In
           </Button>
+          <Box sx={{display: "flex", justifyContent: "space-around"}}>
+
           <Link
             to="/signIn"
             style={{
@@ -96,6 +117,18 @@ const [formData, setFormData] = useState({
           >
             Forgot password?
           </Link>
+          <Link
+            to="/"
+            style={{
+              color: "#2C2C2C",
+              fontStyle: "italic",
+              textDecoration: "underline",
+              textAlign: "left",
+            }}
+          >
+            Return Home
+          </Link>
+          </Box>
         </Box>
       </Box>
     </Box>

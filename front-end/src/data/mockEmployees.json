@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "name": "Jojo P.",
+    "role": "Staff",
+    "center": "Engelwood",
+    "status": "Active"
+  },
+  {
+    "id": 2,
+    "name": "Tayo U.",
+    "role": "Admin",
+    "center": "Callahan",
+    "status": "Active"
+  },
+  {
+    "id": 3,
+    "name": "Luis M.",
+    "role": "Staff",
+    "center": "RISE",
+    "status": "Inactive"
+  },
+  {
+    "id": 4,
+    "name": "Maria G.",
+    "role": "Staff",
+    "center": "HOLA",
+    "status": "Active"
+  },
+  {
+    "id": 5,
+    "name": "John D.",
+    "role": "Admin",
+    "center": "Engelwood",
+    "status": "Inactive"
+  }
+]
+
