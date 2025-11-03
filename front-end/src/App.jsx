@@ -8,6 +8,7 @@ import DeviceCheckOut from "./pages/DeviceCheckOut";
 import { Routes, Route } from "react-router-dom";
 import NavBar from "./components/NavBar";
 import Admin from './pages/AdminDashboardPage'
+import EligibilityPage from "./pages/EligibilityPage";
 
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
         <Route path="/DeviceCheckIn" element={<DeviceCheckIn />} />
         <Route path="/DeviceCheckOut" element={<DeviceCheckOut />} />
         <Route path="/admin" element={<Admin />} />
+        <Route path="/eligibility" element={<EligibilityPage />} />
       </Routes>
     </>
   );
