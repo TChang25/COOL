@@ -15,7 +15,19 @@ Once the project is set up, the first step is to launch the Spring Boot applicat
 How to launch Spring Boot (mvn spring-boot:run)
 Verifying server is running (console logs)
 
-### 1.1 Launching with Maven
+### 1.1 Launching with Maven and Docker
+Before starting the application, make sure Docker is running — this is required for the MySQL container that hosts your project database.
+You can verify that Docker is running by using the command at the docker terminal:
+```bash
+docker ps
+```
+Expected:
+```
+CONTAINER ID   IMAGE       COMMAND                  CREATED      STATUS          PORTS                               NAMES     
+c10660064467   mysql:8.0   "docker-entrypoint.s…"   3 days ago   Up 14 seconds   0.0.0.0:3306->3306/tcp, 33060/tcp   cool-mysql
+```
+If the container list shows your MySQL container (e.g., cool_db), then Docker is active and ready.
+
 From the project’s root directory, run the following commands in your terminal:
 ```bash
 mvn clean install
@@ -101,13 +113,15 @@ As you can see here wew where able to have a successful GET and seeing the page 
 Once the Spring Boot application is running, we can interact with the main entities through the REST controllers. Each controller maps HTTP requests to the corresponding service/repository layer for CRUD operations.
 
 ### 3.1 Controllers in the Project
-| Controller               | Description                                                             |
-| ------------------------ | ----------------------------------------------------------------------- |
-| `LocationController`     | Handles operations related to locations (create, read, update, delete). |
-| `AppUserController`      | Manages user accounts and related information.                          |
-| `RoleController`         | Handles user roles and permissions.                                     |
-| `UserLocationController` | Manages the associations between users and locations.                   |
-
+| Controller                     | Description                                                                 |
+| ------------------------------- | --------------------------------------------------------------------------- |
+| `AppUserController`             | Manages user accounts and related information.                              |
+| `DeviceController`              | Handles operations for managing devices assigned to users or locations.     |
+| `HomeController`                | Provides base or test endpoints for verifying API functionality.            |
+| `LocationController`            | Handles operations related to locations (create, read, update, delete).     |
+| `UserLocationAccessController`  | Manages access permissions for users to specific locations.                 |
+| `UserLocationController`        | Manages associations between users and locations.                           |
+| `UserRoleController`            | Manages user roles, assignments, and related access levels.                 |
 
 ### 3.2 Planned Endpoints
 For each controller, the typical REST endpoints include:
@@ -123,6 +137,9 @@ The same pattern applies to AppUser, Role, and UserLocation controllers. GET for
 
 This overview gives users a clear idea of which endpoints exist and what operations are supported before moving on to testing them with Postman.
 
+Controllers that use composite primary keys (for example, those combining multiple foreign keys such as userId and locationId) will not require PUT operations in Postman.
+
+This is because composite key relationships are typically managed through associations, not direct updates.
 
 ## 4. Testing CRUD Endpoints with Postman 
 In this section, we use Postman to test the CRUD (Create, Read, Update, Delete) endpoints for each of our controllers: LocationController, RoleController, AppUserController, and UserLocationController. For each controller, we demonstrate how to:
@@ -144,16 +161,21 @@ When testing endpoints, you may encounter errors such as 500 Internal Server Err
 
 Best Practice: Be careful when writing your controller logic. Always check that all input values exist before using them, handle optional objects properly, and validate request bodies. Clear and defensive coding reduces runtime errors significantly.
 
-
 ## 6. Verifying Database Changes
 After performing POST, PUT, or DELETE operations via Postman, it’s a good practice to verify that the changes actually took place in the database.
 Open MySQL Workbench or your preferred SQL client.
 Query the relevant table, for example:
 
 ```sql
-SELECT * FROM user_location;
-SELECT * FROM app_user;
-SELECT * FROM location;
+mysql> SHOW DATABASES;
+mysql> USE cool_db;
+mysql> SHOW TABLES;
+mysql> SELECT * FROM app_user;
+mysql> SELECT * FROM user_role;
+mysql> SELECT * FROM user_location_access;
+mysql> SELECT * FROM device;
+mysql> SELECT * FROM location;
+mysql> exit
 ```
 - Confirm that new entries were inserted, updates were applied, or deletions removed the correct records.
 

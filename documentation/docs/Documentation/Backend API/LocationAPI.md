@@ -1,98 +1,460 @@
 # LocationAPI
 
-## LocationController
-### GET All Locations
-First, navigate to our `LocationController` URL: `http://localhost:8080/api/locations`. This page should load without errors and display the test items from the `location` table in the database.
+The Location API is designed to manage all physical site data within the system. It provides full CRUD (Create, Read, Update, Delete) functionality for handling location records, allowing the system to store and retrieve important information such as address, city, state, and contact details for each site. These endpoints serve as the foundation for connecting users, devices, and activities to specific physical locations.
 
-![alt text](../../../MD2_images/ApiLocationsPage.png)
+This API is primarily intended for administrative and system-level operations. Employees or system administrators will use it to register new locations, update existing details, or remove outdated entries. Regular users will typically only see this information displayed through the application interface rather than modify it directly.
 
-Next, open a new Postman tab, select the `GET` method, and enter the same URL to retrieve a list of all locations stored in the database.
+The main interactions will take place through the system’s user interface or via API testing tools such as Postman. Each location can be viewed, created, modified, or deleted using the provided REST endpoints.
 
-![alt text](../../../MD2_images/GetAllLocations.png)
+## Table of Contents
+- [Location API](#locationapi)
+- [User Location Access API](#user_location_access)
+- [User Location API](#user-location)
 
-### GET Single Location
-Use the `GET` method to retrieve a specific location by its ID. Replace `{id}` with the numeric ID of the location you want to retrieve.
-**URL:**
-`http://localhost:8080/api/locations/{id}`
 
-![alt text](../../../MD2_images/GetSelectedID.png)
+## Location (http://localhost:8080/api/locations)
+### POST — Create a New Location
+URL: http://localhost:8080/api/locations
 
-### POST a New Location
-The `POST` method allows us to create a new location in the database. In Postman, select `POST`, set the URL to `http://localhost:8080/api/locations`, and use the `Body` tab with `raw` JSON.
-
-**Example JSON:**
-
+Request Body:
 ```JSON
 {
-    "locationName": "West Side Center",
-    "address": "789 Pine Rd, Orlando, FL"
+  "locationName": "Downtown Recreation Center",
+  "streetAddress": "500 S Orange Ave",
+  "city": "Orlando",
+  "state": "FL",
+  "zipCode": "32801",
+  "contactNumber": "407-555-1234"
+}
+```
+Expected Response:
+```
+{
+    "locationId": 2,
+    "locationName": "Downtown Recreation Center",
+    "streetAddress": "500 S Orange Ave",
+    "city": "Orlando",
+    "state": "FL",
+    "zipCode": "32801",
+    "contactNumber": "407-555-1234",
+    "createdAt": null,
+    "updatedAt": null
+}
+```
+---
+### GET — Retrieve All Locations
+URL: http://localhost:8080/api/locations
+
+Expected:
+```
+[
+    {
+        "locationId": 1,
+        "locationName": "Callahan Neighborhood Center",
+        "streetAddress": "101 N. Parramore Ave Ste. 1713",
+        "city": "Orlando",
+        "state": "FL",
+        "zipCode": "32801",
+        "contactNumber": "407-246-4442",
+        "createdAt": "2025-10-15T20:06:03.000+00:00",
+        "updatedAt": "2025-10-15T20:06:03.000+00:00"
+    },
+    {
+        "locationId": 2,
+        "locationName": "Downtown Recreation Center",
+        "streetAddress": "500 S Orange Ave",
+        "city": "Orlando",
+        "state": "FL",
+        "zipCode": "32801",
+        "contactNumber": "407-555-1234",
+        "createdAt": null,
+        "updatedAt": null
+    }
+]
+```
+---
+### GET (by ID) — Retrieve a Specific Location
+URL: http://localhost:8080/api/locations/1
+
+
+Expected:
+```
+{
+    "zipCode": "32801",
+    "locationName": "Callahan Neighborhood Center",
+    "address": "101 N. Parramore Ave Ste. 1713",
+    "city": "Orlando",
+    "locationId": 1,
+    "state": "FL"
+}
+```
+---
+### PUT — Update an Existing Location
+URL: http://localhost:8080/api/locations/2
+
+body raw JSON
+```JSON
+{
+  "locationName": "Downtown Recreation Center",
+  "streetAddress": "500 S Orange Ave",
+  "city": "Orlando",
+  "state": "FL",
+  "zipCode": "11111",
+  "contactNumber": "407-555-1234"
 }
 ```
 
-![alt text](../../../MD2_images/PostLocationData.png)
-
-### PUT / Update Location
-The `PUT` method updates an existing location. Replace `{id}` with the location ID you want to update, then provide the updated information in the body as raw JSON.
-
-**Example JSON for update:**
-```JSON
+Expected:
+```
 {
-    "locationName": "Downtown Hub",
-    "address": "123 Main St, Orlando, FL"
+    "locationId": 2,
+    "locationName": "Downtown Recreation Center",
+    "streetAddress": "500 S Orange Ave",
+    "city": "Orlando",
+    "state": "FL",
+    "zipCode": "11111",
+    "contactNumber": "407-555-1234",
+    "createdAt": null,
+    "updatedAt": null
+}
+```
+---
+
+### DELETE — Remove a Location
+URL:http://localhost:8080/api/locations/2
+
+Expected:
+1
+
+
+
+---
+
+### ⚠️ **Warning – Composite Key Dependencies**
+If you encounter issues when making **POST** requests for `user-locations` or `user-locations-access`, ensure that the corresponding entries already exist in the **AppUser**, **UserRole**, and **Location** tables.  
+
+These endpoints rely on **composite keys** (such as `userId` and `locationId`), so valid user, role, and location records must be present in the database **before** creating a new user-location mapping.
+
+---
+
+
+## user_location_access (http://localhost:8080/api/user-locations-access)
+
+> **Note:** Locations with composite keys do not require PUT requests in Postman.
+
+
+### POST
+URL: http://localhost:8080/api/user-locations-access
+
+body raw JSON
+```JSON
+
+{
+  "userId": 1,
+  "locationId": 1
 }
 ```
 
-![alt text](../../../MD2_images/PutUpdate.png)
+Expected:
+```
 
-### DELETE a Location
-The `DELETE` method removes a specific location from the database. Replace `{id}` with the ID of the location to delete.
-
-**URL:**
-
-![alt text](../../../MD2_images/DELETElocation.png)
-
-Now that we’ve tested the Location endpoints in real time, we will apply the same testing approach to the remaining controllers.
-
-## UserLocationController
-
-### GET All User-Locations
-URL: `http://localhost:8080/api/user-locations`
-
-![alt text](../../../MD2_images/GetListUserLocation.png)
-
-### GET Single User-Location
-URL: `http://localhost:8080/api/user-locations/{id}`
-
-![alt text](../../../MD2_images/GetSelectedUserLocation.png)
-
-### POST a New User-Location
-URL: `http://localhost:8080/api/user-locations`
-Method: POST
-Body (raw JSON using userId and locationId):
-```JSON
 {
-    "userId": 5,
-    "locationId": 1
+    "appUser": {
+        "userId": 1,
+        "fullName": "Test Admin",
+        "email": "admin@workemail.com",
+        "password": "hashed_pw_here",
+        "role": {
+            "roleId": 1,
+            "roleName": "Admin",
+            "dlRequired": false,
+            "active": true
+        },
+        "dlNum": null,
+        "dlState": null,
+        "streetAddress": null,
+        "city": null,
+        "state": null,
+        "zipCode": null,
+        "contactNumber": null,
+        "dateOfBirth": null,
+        "createdAt": "2025-10-16T01:21:09",
+        "updatedAt": "2025-10-16T01:21:09"
+    },
+    "location": {
+        "locationId": 1,
+        "locationName": "Callahan Neighborhood Center",
+        "streetAddress": "101 N. Parramore Ave Ste. 1713",
+        "city": "Orlando",
+        "state": "FL",
+        "zipCode": "32801",
+        "contactNumber": "407-246-4442",
+        "createdAt": "2025-10-16T01:21:09",
+        "updatedAt": "2025-10-16T01:21:09"
+    }
+}
+```
+---
+### GET
+URL: http://localhost:8080/api/user-locations-access
+
+Expected:
+```
+
+[
+    {
+        "appUser": {
+            "userId": 1,
+            "fullName": "Test Admin",
+            "email": "admin@workemail.com",
+            "password": "hashed_pw_here",
+            "role": {
+                "roleId": 1,
+                "roleName": "Admin",
+                "dlRequired": false,
+                "active": true
+            },
+            "dlNum": null,
+            "dlState": null,
+            "streetAddress": null,
+            "city": null,
+            "state": null,
+            "zipCode": null,
+            "contactNumber": null,
+            "dateOfBirth": null,
+            "createdAt": "2025-10-16T01:21:09",
+            "updatedAt": "2025-10-16T01:21:09"
+        },
+        "location": {
+            "locationId": 1,
+            "locationName": "Callahan Neighborhood Center",
+            "streetAddress": "101 N. Parramore Ave Ste. 1713",
+            "city": "Orlando",
+            "state": "FL",
+            "zipCode": "32801",
+            "contactNumber": "407-246-4442",
+            "createdAt": "2025-10-16T01:21:09",
+            "updatedAt": "2025-10-16T01:21:09"
+        }
+    }
+]
+```
+---
+### GET selected ID
+URL: http://localhost:8080/api/user-locations-access/1/1
+
+Expected:
+```
+
+{
+    "appUser": {
+        "userId": 1,
+        "fullName": "Test Admin",
+        "email": "admin@workemail.com",
+        "password": "hashed_pw_here",
+        "role": {
+            "roleId": 1,
+            "roleName": "Admin",
+            "dlRequired": false,
+            "active": true
+        },
+        "dlNum": null,
+        "dlState": null,
+        "streetAddress": null,
+        "city": null,
+        "state": null,
+        "zipCode": null,
+        "contactNumber": null,
+        "dateOfBirth": null,
+        "createdAt": "2025-10-16T01:21:09",
+        "updatedAt": "2025-10-16T01:21:09"
+    },
+    "location": {
+        "locationId": 1,
+        "locationName": "Callahan Neighborhood Center",
+        "streetAddress": "101 N. Parramore Ave Ste. 1713",
+        "city": "Orlando",
+        "state": "FL",
+        "zipCode": "32801",
+        "contactNumber": "407-246-4442",
+        "createdAt": "2025-10-16T01:21:09",
+        "updatedAt": "2025-10-16T01:21:09"
+    }
 }
 ```
 
-![alt text](../../../MD2_images/PostUserLocation.png)
+---
+### DELETE
+URL: http://localhost:8080/api/user-locations-access/1/1
 
-### PUT / Update User-Location
-URL: `http://localhost:8080/api/user-locations/{id}`
-Method: PUT
-Body (raw JSON):
+Expected:
+```
+1
+```
+---
+
+## user location(http://localhost:8080/api/user-locations)
+
+> **Note:** Locations with composite keys do not require PUT requests in Postman.
+
+### POST
+URL: http://localhost:8080/api/user-locations
+
+body raw JSON
 ```JSON
+
 {
-    "userId": 5,
-    "locationId": 2
+  "user": { "userId": 1 },
+  "location": { "locationId": 1 }
 }
 ```
 
-![alt text](../../../MD2_images/PutUserLocation.png)
+Expected:
+```
 
-### DELETE a User-Location
-URL: `http://localhost:8080/api/user-locations/{id}`
-Method: DELETE
+{
+    "id": {
+        "userId": 1,
+        "locationId": 1
+    },
+    "user": {
+        "userId": 1,
+        "fullName": "Test Admin",
+        "email": "admin@workemail.com",
+        "password": "hashed_pw_here",
+        "role": {
+            "roleId": 1,
+            "roleName": "Admin",
+            "dlRequired": false,
+            "active": true
+        },
+        "dlNum": null,
+        "dlState": null,
+        "streetAddress": null,
+        "city": null,
+        "state": null,
+        "zipCode": null,
+        "contactNumber": null,
+        "dateOfBirth": null,
+        "createdAt": "2025-10-16T13:25:59",
+        "updatedAt": "2025-10-16T13:25:59"
+    },
+    "location": {
+        "locationId": 1,
+        "locationName": "Callahan Neighborhood Center",
+        "streetAddress": "101 N. Parramore Ave Ste. 1713",
+        "city": "Orlando",
+        "state": "FL",
+        "zipCode": "32801",
+        "contactNumber": "407-246-4442",
+        "createdAt": "2025-10-16T13:25:59",
+        "updatedAt": "2025-10-16T13:25:59"
+    }
+}
+```
+---
+### GET
+URL: http://localhost:8080/api/user-locations
 
-![alt text](../../../MD2_images/DeleteUserLocation.png)
+Expected:
+```
+
+[
+    {
+        "id": {
+            "userId": 1,
+            "locationId": 1
+        },
+        "user": {
+            "userId": 1,
+            "fullName": "Test Admin",
+            "email": "admin@workemail.com",
+            "password": "hashed_pw_here",
+            "role": {
+                "roleId": 1,
+                "roleName": "Admin",
+                "dlRequired": false,
+                "active": true
+            },
+            "dlNum": null,
+            "dlState": null,
+            "streetAddress": null,
+            "city": null,
+            "state": null,
+            "zipCode": null,
+            "contactNumber": null,
+            "dateOfBirth": null,
+            "createdAt": "2025-10-16T13:25:59",
+            "updatedAt": "2025-10-16T13:25:59"
+        },
+        "location": {
+            "locationId": 1,
+            "locationName": "Callahan Neighborhood Center",
+            "streetAddress": "101 N. Parramore Ave Ste. 1713",
+            "city": "Orlando",
+            "state": "FL",
+            "zipCode": "32801",
+            "contactNumber": "407-246-4442",
+            "createdAt": "2025-10-16T13:25:59",
+            "updatedAt": "2025-10-16T13:25:59"
+        }
+    }
+]
+```
+---
+### GET selected ID
+URL: http://localhost:8080/api/user-locations/1/1
+
+Expected:
+```
+
+{
+    "id": {
+        "userId": 1,
+        "locationId": 1
+    },
+    "user": {
+        "userId": 1,
+        "fullName": "Test Admin",
+        "email": "admin@workemail.com",
+        "password": "hashed_pw_here",
+        "role": {
+            "roleId": 1,
+            "roleName": "Admin",
+            "dlRequired": false,
+            "active": true
+        },
+        "dlNum": null,
+        "dlState": null,
+        "streetAddress": null,
+        "city": null,
+        "state": null,
+        "zipCode": null,
+        "contactNumber": null,
+        "dateOfBirth": null,
+        "createdAt": "2025-10-16T13:25:59",
+        "updatedAt": "2025-10-16T13:25:59"
+    },
+    "location": {
+        "locationId": 1,
+        "locationName": "Callahan Neighborhood Center",
+        "streetAddress": "101 N. Parramore Ave Ste. 1713",
+        "city": "Orlando",
+        "state": "FL",
+        "zipCode": "32801",
+        "contactNumber": "407-246-4442",
+        "createdAt": "2025-10-16T13:25:59",
+        "updatedAt": "2025-10-16T13:25:59"
+    }
+}
+
+```
+
+---
+### DELETE
+URL: http://localhost:8080/api/user-locations/1/1
+
+Expected:
+```
+1
+```
