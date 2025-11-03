@@ -2,10 +2,9 @@ import { AppBar, Toolbar, IconButton, Box, Link } from "@mui/material";
 import SettingsOutlined from "@mui/icons-material/SettingsOutlined";
 import AccountCircleOutlined from "@mui/icons-material/AccountCircleOutlined";
 import { useAuth } from "../context/MockAuth";
-import { useLocation } from "react-router-dom";
+import { Link as RouterLink, useLocation } from "react-router-dom";
 import { useState } from "react";
-import HelpModal from "../components/HelpModal"; 
-
+import HelpModal from "../components/HelpModal";
 
 const NavBar = () => {
   const { user } = useAuth();
@@ -13,7 +12,6 @@ const NavBar = () => {
   const location = useLocation();
 
   const [helpOpen, setHelpOpen] = useState(false);
-
 
   // ✅ Show top bar on landing *and* sign-in pages
   const showTopBar =
@@ -35,15 +33,17 @@ const NavBar = () => {
               justifyContent: "space-between",
             }}
           >
-            <Box
-              component="img"
-              sx={{
-                padding: "30px",
-                width: 150,
-              }}
-              alt="Fountain Logo"
-              src={"./src/assets/fountainLogo2.png"}
-            />
+            <Link component={RouterLink} to="/">
+              <Box
+                component="img"
+                sx={{
+                  padding: "30px",
+                  width: 150,
+                }}
+                alt="Fountain Logo"
+                src={"./src/assets/fountainLogo2.png"}
+              />
+            </Link>
             <Box
               sx={{
                 display: "flex",
@@ -87,15 +87,17 @@ const NavBar = () => {
             justifyContent: "space-between",
           }}
         >
-          <Box
-            component="img"
-            sx={{
-              padding: "30px",
-              width: 150,
-            }}
-            alt="Fountain Logo"
-            src={"./src/assets/fountainLogo2.png"}
-          />
+          <Link component={RouterLink} to="/">
+            <Box
+              component="img"
+              sx={{
+                padding: "30px",
+                width: 150,
+              }}
+              alt="Fountain Logo"
+              src={"./src/assets/fountainLogo2.png"}
+            />
+          </Link>
           <Box
             sx={{
               display: "flex",
@@ -160,7 +162,6 @@ const NavBar = () => {
       {/* 🔄 Show role-based navbar for all other pages */}
       {!showTopBar && renderNavbar()}
       <HelpModal open={helpOpen} onClose={() => setHelpOpen(false)} />
-
     </>
   );
 };
