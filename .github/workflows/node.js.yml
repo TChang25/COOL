@@ -21,12 +21,22 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+    
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-    - working-directory: ./frontend
-    - run: npm ci
-    - run: npm run build --if-present
-    - run: npm test
+        cache-dependency-path: ./frontend/package-lock.json
+      
+    - name: Install dependencies
+      run: npm ci
+      working-directory: ./frontend
+      
+    - name: Build project
+      run: npm run build --if-present
+      working-directory: ./frontend
+      
+    - name: Run tests
+      run: npm test
+      working-directory: ./frontend
