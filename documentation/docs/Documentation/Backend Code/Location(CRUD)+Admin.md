@@ -14,7 +14,6 @@ The diagram below illustrates how the entities interact and how data flows throu
 
 Using this database structure, the API is able to map each table to a corresponding Java entity using Hibernate (JPA). These entities serve as the foundation for repositories, services, and controllers, allowing the application to perform CRUD operations on the data. The following sections will guide you through setting up the project environment, configuring dependencies, and preparing the application for development and testing.
 
-
 ## 1. Database Setup
 For the initial database configuration, we followed the structure and conventions outlined in `[COOL Database Setup Guide (Dev Testing)]` created by Nova Robb. That document provides detailed SQL table creation scripts, relationships, and sample data for the core entities.
 
@@ -23,7 +22,6 @@ In this section, we build upon that foundation by referencing the same schema an
 - MySQL 8.0+  
 - A database named `tech_loan_system` (or update `application.properties` with your DB name). 
 - Configure connection in `application.properties`.
-
 
 ## 2. Entities with Hibernate
 This project uses Spring Boot with Hibernate (JPA implementation) to map database tables into Java objects. These entities represent the schema we defined in Part 1, and they provide the foundation for repositories, services, and controllers.
@@ -57,28 +55,437 @@ First we must fill the entity folder with java class where we will Ensure proper
 
 Hibernate allows working with Java objects instead of raw SQL. This makes the code cleaner and less error-prone while still enforcing database constraints.
 
-### 2.4 Creating Entity Classes (`Location`, `AppUser`, `Role`, `UserLocation`).
-Place these files inside:
-src/main/java/com/example/prototypesetup/entity
+### 2.4 Creating Entity Classes (`AppUser`,`Device`,`DeviceStatus`,`DeviceType`,`UserLocation`,`UserLocationid`,`Location`,`UserLocationAccess`,`UserLocationAccessid`,`UserRole`).
 
-`Create the Role.java class`
+This section will be a bit larger so that we could work on all sections of the Location Management section.
+Place these files inside:
+java/com/example/prototypesetup/entity
+
+`AppUser.java`
+```java
+package com.example.prototypesetup.entity;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
+
+@Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Table(name = "app_user")
+public class AppUser {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "app_user_id")
+    private Long userId;
+
+    @Column(name = "app_user_full_name", nullable = false, length = 100)
+    private String fullName;
+
+    @Column(nullable = false, unique = true, length = 100)
+    private String email;
+
+    @Column(name = "password_hash", nullable = false)
+    private String password;
+
+    @ManyToOne
+    @JoinColumn(name = "user_role_id", nullable = false)
+    private UserRole role;
+
+    // Citizen-specific fields
+    @Column(name = "dl_num", length = 50)
+    private String dlNum;
+
+    @Column(name = "dl_state", length = 2)
+    private String dlState;
+
+    @Column(name = "street_address", length = 255)
+    private String streetAddress;
+
+    @Column(length = 100)
+    private String city;
+
+    @Column(length = 2)
+    private String state;
+
+    @Column(name = "zip_code", length = 10)
+    private String zipCode;
+
+    @Column(name = "contact_number", length = 20)
+    private String contactNumber;
+
+    @Column(name = "date_of_birth")
+    private LocalDate dateOfBirth;
+
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    @ManyToMany
+    @JoinTable(
+        name = "user_location",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "location_id")
+    )
+    
+    @JsonBackReference
+    private Set<Location> locations = new HashSet<>();
+}
+
+```
+
+---
+`Device.java`
+```java
+package com.example.prototypesetup.entity;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Table(name = "device")
+public class Device {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "device_id")
+    private Long deviceId;
+
+    @Column(name = "device_name", nullable = false)
+    private String deviceName;
+
+    @Column(name = "serial_number", nullable = false)
+    private String serialNumber;
+
+    @ManyToOne
+    @JoinColumn(name = "device_type_id", nullable = false)
+    private DeviceType type;
+
+    @ManyToOne
+    @JoinColumn(name = "device_status_id", nullable = false)
+    private DeviceStatus status;
+
+    @ManyToOne
+    @JoinColumn(name = "location_id", nullable = false)
+    private Location location;
+
+    @ManyToOne
+    @JoinColumn(name = "created_by_user_id", nullable = false)
+    private AppUser createdBy;
+
+    @Column(name = "created_at", insertable = false, updatable = false)
+    private java.time.LocalDateTime createdAt;
+
+    @Column(name = "updated_at", insertable = false, updatable = false)
+    private java.time.LocalDateTime updatedAt;
+
+    @Override
+    public String toString() {
+        return "Device{" +
+                "deviceId=" + deviceId +
+                ", deviceName='" + deviceName + '\'' +
+                ", type=" + (type != null ? type.getDeviceTypeName() : "null") +
+                ", status=" + (status != null ? status.getStatusName() : "null") +
+                ", location=" + (location != null ? location.getLocationName() : "null") +
+                ", createdBy=" + (createdBy != null ? createdBy.getFullName() : "null") +
+                '}';
+    }
+}
+
+
+
+```
+
+---
+`DeviceStatus.java`
+```java
+package com.example.prototypesetup.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+@Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Table(name = "device_status")
+public class DeviceStatus {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "device_status_id")
+    private Integer deviceStatusId;
+
+    @Column(name = "status_name", nullable = false)
+    private String statusName;
+}
+
+```
+
+---
+`DeviceType.java`
+```java
+package com.example.prototypesetup.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+@Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Table(name = "device_type")
+public class DeviceType {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "device_type_id")
+    private Integer deviceTypeId;
+
+    @Column(name = "device_type_name", nullable = false)
+    private String deviceTypeName;
+}
+
+```
+
+---
+`Location`
+```java
+package com.example.prototypesetup.entity;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
+
+@Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Table(name = "location")
+public class Location {
+
+      @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "location_id")
+    private Integer locationId;
+
+    @Column(name = "location_name", nullable = false)
+    private String locationName;
+
+    @Column(name = "street_address")
+    private String streetAddress;
+
+    @Column(name = "city")
+    private String city;
+
+    @Column(name = "state", length = 2)
+    private String state;
+
+    @Column(name = "zip_code", length = 10)
+    private String zipCode;
+
+    @Column(name = "contact_number", length = 20)
+    private String contactNumber;
+
+       @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    // Prevent infinite recursion when serializing
+    @ManyToMany(mappedBy = "locations")
+    @JsonIgnore
+    private Set<AppUser> users = new HashSet<>();
+
+}
+
+```
+
+---
+`UserLocation.java`
+```java
+package com.example.prototypesetup.entity;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Table(name = "user_location")
+public class UserLocation {
+
+    @EmbeddedId
+    private UserLocationId id;
+
+    @ManyToOne
+    @MapsId("userId")
+    @JoinColumn(name = "user_id")
+    private AppUser user;
+
+    @ManyToOne
+    @MapsId("locationId")
+    @JoinColumn(name = "location_id")
+    private Location location;
+}
+
+```
+
+---
+`UserLocationAccess.java`
+```java
+package com.example.prototypesetup.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+import java.io.Serializable;
+
+
+@Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@IdClass(UserLocationAccessId.class)
+@Table(name = "user_location_access")
+public class UserLocationAccess implements Serializable {
+
+    @Id
+    @ManyToOne
+    @JoinColumn(name = "app_user_id", nullable = false)
+    private AppUser appUser;
+
+    @Id
+    @ManyToOne
+    @JoinColumn(name = "location_id", nullable = false)
+    private Location location;
+
+}
+
+```
+
+---
+`UserLocationAccessid`
+```java
+package com.example.prototypesetup.entity;
+
+import java.io.Serializable;
+import java.util.Objects;
+
+public class UserLocationAccessId implements Serializable {
+
+    private Long appUser;   // must match entity field name: appUser
+    private Integer location;  // must match entity field name: location
+
+    public UserLocationAccessId() {}
+
+    public UserLocationAccessId(Long appUser, Integer location) {
+        this.appUser = appUser;
+        this.location = location;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UserLocationAccessId that = (UserLocationAccessId) o;
+        return Objects.equals(appUser, that.appUser) &&
+               Objects.equals(location, that.location);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(appUser, location);
+    }
+}
+
+```
+
+---
+
+`UserLocationid`
+```java
+package com.example.prototypesetup.entity;
+
+import jakarta.persistence.Embeddable;
+import java.io.Serializable;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Embeddable
+public class UserLocationId implements Serializable {
+    private Long userId;
+    private Integer locationId;
+}
+```
+
+---
+
+`UserRole.java`
 ```java
 package com.example.prototypesetup.entity;
 
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "role")
-public class Role {
+@Table(name = "user_role") // matches your SQL table
+public class UserRole {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_role_id")
     private Long roleId;
 
-    @Column(nullable = false, unique = true, length = 50)
+    @Column(name = "user_role_name", nullable = false, unique = true, length = 50)
     private String roleName;
 
-    private boolean dlFlag;          // requires Driver’s License?
-    private boolean otherPermFlag;   // extra permissions
+    @Column(name = "dl_required", nullable = false)
+    private boolean dlRequired;
+
+    @Column(name = "is_active", nullable = false)
+    private boolean isActive = true;
 
     // Getters and setters
     public Long getRoleId() { return roleId; }
@@ -87,161 +494,15 @@ public class Role {
     public String getRoleName() { return roleName; }
     public void setRoleName(String roleName) { this.roleName = roleName; }
 
-    public boolean isDlFlag() { return dlFlag; }
-    public void setDlFlag(boolean dlFlag) { this.dlFlag = dlFlag; }
+    public boolean isDlRequired() { return dlRequired; }
+    public void setDlRequired(boolean dlRequired) { this.dlRequired = dlRequired; }
 
-    public boolean isOtherPermFlag() { return otherPermFlag; }
-    public void setOtherPermFlag(boolean otherPermFlag) { this.otherPermFlag = otherPermFlag; }
+    public boolean isActive() { return isActive; }
+    public void setActive(boolean active) { isActive = active; }
 }
-
 ```
-------
-`Create the AppUser.java class`
-```java
-package com.example.prototypesetup.entity;
 
-
-import jakarta.persistence.*;
-import java.util.HashSet;
-import java.util.Set;
-
-import com.fasterxml.jackson.annotation.JsonBackReference;
-
-@Entity
-@Table(name = "app_user")
-public class AppUser {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long userId;
-
-    @Column(nullable = false, unique = true, length = 50)
-    private String username;
-
-    @Column(nullable = false)
-    private String password;
-
-    @Column(nullable = false, unique = true, length = 100)
-    private String email;
-
-    @ManyToOne
-    @JoinColumn(name = "role_id", nullable = false)
-    private Role role;
-
-    @ManyToMany
-    @JoinTable(
-        name = "user_location",
-        joinColumns = @JoinColumn(name = "user_id"),
-        inverseJoinColumns = @JoinColumn(name = "location_id")
-    )
-    @JsonBackReference
-    private Set<Location> locations = new HashSet<>();
-
-    // Getters and setters
-    public Long getUserId() { return userId; }
-    public void setUserId(Long userId) { this.userId = userId; }
-
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
-
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
-
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
-
-    public Role getRole() { return role; }
-    public void setRole(Role role) { this.role = role; }
-
-    public Set<Location> getLocations() { return locations; }
-    public void setLocations(Set<Location> locations) { this.locations = locations; }
-}
-
-```
-------
-`Create the Location.java class`
-```java
-package com.example.prototypesetup.entity;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
-import java.util.HashSet;
-import java.util.Set;
-
-@Entity
-@Table(name = "location")
-public class Location {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "location_id") // maps to MySQL column
-    private Long locationId;
-
-    @Column(nullable = false, unique = true, length = 100)
-    private String locationName;
-
-    private String address;
-
-    // Prevent infinite recursion when serializing
-    @ManyToMany(mappedBy = "locations")
-    @JsonIgnore
-    private Set<AppUser> users = new HashSet<>();
-
-    // Getters and setters
-    public Long getLocationId() { return locationId; }
-    public void setLocationId(Long locationId) { this.locationId = locationId; }
-
-    public String getLocationName() { return locationName; }
-    public void setLocationName(String locationName) { this.locationName = locationName; }
-
-    public String getAddress() { return address; }
-    public void setAddress(String address) { this.address = address; }
-
-    public Set<AppUser> getUsers() { return users; }
-    public void setUsers(Set<AppUser> users) { this.users = users; }
-}
-
-```
-------
-`Create UserLocation.java class`
-```java
-package com.example.prototypesetup.entity;
-
-
-import jakarta.persistence.*;
-import java.time.LocalDateTime;
-
-@Entity
-@Table(name = "user_location")
-public class UserLocation {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long userLocationId;
-
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private AppUser user;
-
-    @ManyToOne
-    @JoinColumn(name = "location_id", nullable = false)
-    private Location location;
-
-    private LocalDateTime assignedAt = LocalDateTime.now();
-
-    // Getters and setters
-    public Long getUserLocationId() { return userLocationId; }
-    public void setUserLocationId(Long userLocationId) { this.userLocationId = userLocationId; }
-
-    public AppUser getUser() { return user; }
-    public void setUser(AppUser user) { this.user = user; }
-
-    public Location getLocation() { return location; }
-    public void setLocation(Location location) { this.location = location; }
-
-    public LocalDateTime getAssignedAt() { return assignedAt; }
-    public void setAssignedAt(LocalDateTime assignedAt) { this.assignedAt = assignedAt; }
-}
-
-```
+---
 
 ## 3. Create pom file
 
@@ -269,8 +530,7 @@ In short, `pom.xml` acts as a blueprint for the project setup, ensuring smooth c
 
 ### 3.3 Full pom.xml
 
-```
-<?xml version="1.0" encoding="UTF-8"?>
+```<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
@@ -323,6 +583,12 @@ In short, `pom.xml` acts as a blueprint for the project setup, ensuring smooth c
     <scope>runtime</scope>
 </dependency>
 
+<dependency>
+    <groupId>org.projectlombok</groupId>
+    <artifactId>lombok</artifactId>
+    <version>1.18.32</version>
+    <scope>provided</scope>
+</dependency>
 
 
         <!-- Lombok (optional, reduces boilerplate getters/setters) -->
@@ -363,7 +629,6 @@ In short, `pom.xml` acts as a blueprint for the project setup, ensuring smooth c
     </plugins>
 </build>
 
-
 </project>
 
 ```
@@ -376,6 +641,8 @@ You can trigger this by running:
 ```bash
 mvn clean install
 ```
+
+---
 
 ## 4. Repository Layer (Spring Data JPA)
 
@@ -403,26 +670,11 @@ This removes boilerplate code and keeps the focus on business logic instead of p
 public interface AppUserRepository extends JpaRepository<AppUser, Integer> {} 
 ```
 
-### 4.3 Creating Repository Layer Classes (`LocationRepository.java`, `AppUserRepository.java`, `RoleRepository.java`, `UserLocationRepository.java`).
+### 4.3 Creating Repository Layer Classes (`AppUserRepository`,`DeviceRepository`,`DeviceStatusRepository`,`DeviceTypeRepository`,`LocationRepository`,`UserLocationAccessRepository`,`UserLocationRepository`,`UserRoleRepository`).
 Place these files inside:
-src/main/java/com/example/prototypesetup/repository
+java/com/example/prototypesetup/repository
 
-
-`Create RoleRepository.java class`
-```java
-package com.example.prototypesetup.repository;
-
-import com.example.prototypesetup.entity.Role;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-
-@Repository
-public interface RoleRepository extends JpaRepository<Role, Long> {
-    Role findByRoleName(String roleName);
-}
-```
-------
-`Create AppUserRepository.java`
+`AppUserRepository.java`
 ```java
 package com.example.prototypesetup.repository;
 
@@ -432,11 +684,70 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface AppUserRepository extends JpaRepository<AppUser, Long> {
-    AppUser findByUsername(String username);
+    AppUser findByfullName(String fullName);
 }
+
 ```
-------
-`Create LocationRepository.java`
+
+---
+`DeviceRepository.java`
+```java
+package com.example.prototypesetup.repository;
+
+import com.example.prototypesetup.entity.Device;
+import com.example.prototypesetup.entity.DeviceStatus;
+import com.example.prototypesetup.entity.DeviceType;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface DeviceRepository extends JpaRepository<Device, Long> {
+
+    // Custom finder methods (optional but helpful)
+    List<Device> findByStatus(DeviceStatus status);
+    List<Device> findByType(DeviceType type);
+
+}
+
+```
+
+---
+`DeviceStatusRepository.java`
+```java
+package com.example.prototypesetup.repository;
+
+import com.example.prototypesetup.entity.DeviceStatus;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface DeviceStatusRepository extends JpaRepository<DeviceStatus, Integer> {
+    // Optional custom methods
+}
+
+```
+
+---
+`DeviceTypeRepository.java`
+```java
+package com.example.prototypesetup.repository;
+
+import com.example.prototypesetup.entity.DeviceType;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface DeviceTypeRepository extends JpaRepository<DeviceType, Integer> {
+    // You can add custom finder methods if needed, e.g., findByIsActive
+}
+
+```
+
+---
+`LocationRepository.java`
 ```java
 package com.example.prototypesetup.repository;
 
@@ -445,26 +756,65 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface LocationRepository extends JpaRepository<Location, Long> {
+public interface LocationRepository extends JpaRepository<Location, Integer> {
     Location findByLocationName(String locationName);
 }
+
 ```
-------
-`Create UserLocationRepository.java (only if you kept UserLocation.java) `
+
+---
+`UserLocationAccessRepository`
 ```java
 package com.example.prototypesetup.repository;
 
-import com.example.prototypesetup.entity.UserLocation;
+import com.example.prototypesetup.entity.UserLocationAccess;
+import com.example.prototypesetup.entity.UserLocationAccessId;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface UserLocationRepository extends JpaRepository<UserLocation, Long> {
+public interface UserLocationAccessRepository extends JpaRepository<UserLocationAccess, UserLocationAccessId> {
 }
+
 ```
+
+---
+`UserLocationRepository.java`
+```java
+package com.example.prototypesetup.repository;
+
+import com.example.prototypesetup.entity.UserLocation;
+import com.example.prototypesetup.entity.UserLocationId;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface UserLocationRepository extends JpaRepository<UserLocation, UserLocationId> {
+}
+
+```
+
+---
+`UserRoleRepository.java`
+```java
+package com.example.prototypesetup.repository;
+
+import com.example.prototypesetup.entity.UserRole;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface UserRoleRepository extends JpaRepository<UserRole, Long> {
+    UserRole findByRoleName(String roleName);
+}
+
+```
+
 
 With repositories in place, the next step is to build the **Service Layer**, which will use these repositories to implement business logic.
 
+---
 
 ## 5. Creating the Hibernate File
 The Hibernate (JPA) configuration file is stored in src/main/resources/application.properties. This file acts as the central configuration hub for database connectivity and ORM behavior in the Spring Boot application. By keeping all database connection details here, we gain flexibility — switching from one database system (e.g., MySQL) to another (e.g., PostgreSQL) only requires adjusting this configuration rather than rewriting business logic or entity classes.
@@ -475,36 +825,34 @@ The file includes:
 - Logging options: Enable SQL query and parameter logging for debugging.
 
 Below is the example configuration:`application.properties`
-```
-# Database connection
-spring.datasource.url=jdbc:mysql://localhost:3306/tech_loan_system
-spring.datasource.username=root
+```# Database connection
+spring.datasource.url=jdbc:mysql://localhost:3306/cool_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+spring.datasource.username=cooldev
 spring.datasource.password=Password
 spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
 
 # Hibernate (JPA) settings
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.show-sql=true
-spring.jpa.database-platform=org.hibernate.dialect.MySQL8Dialect
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL8Dialect
 
-# Optional: log SQL queries to console
+# Debug logging
 logging.level.org.hibernate.SQL=DEBUG
 logging.level.org.hibernate.type.descriptor.sql.BasicBinder=TRACE
+logging.level.org.springframework=DEBUG
+logging.level.org.hibernate=DEBUG
 
-# Show full stack traces in console for debugging
+# Error details
 server.error.include-message=always
 server.error.include-binding-errors=always
 server.error.include-stacktrace=always
 
-# Spring logging
-logging.level.org.springframework=DEBUG
-logging.level.org.hibernate=DEBUG
 ```
 Tip: For security, credentials like spring.datasource.password should not be committed to version control. Use environment variables or Spring Boot’s application.yml profiles in production.
 
+---
 
-
-## 6. Main Application to run hibernate 
+## 6. Main Application to run Hibernate 
 Spring Boot eliminates the need to manually configure and start an application server. Instead, it provides a built-in launcher through a main class. This class automatically bootstraps the entire application, including the Hibernate configuration defined earlier.
 
 Our entry point is the PrototypeSetupApplication class:
@@ -525,13 +873,25 @@ public class PrototypeSetupApplication {
 }
 ```
 ### 6.1 Details
-@SpringBootApplication → Marks this class as the starting point. It enables auto-configuration, component scanning, and integrates Spring Boot features.
+- @SpringBootApplication → Marks this class as the starting point. It enables auto-configuration, component scanning, and integrates Spring Boot features.
 
-SpringApplication.run(...) → Launches the application, initializes the Spring context, and connects Hibernate to the configured database.
+- SpringApplication.run(...) → Launches the application, initializes the Spring context, and connects Hibernate to the configured database.
 
 ### 6.2 Running the Application
 
-After writing the main class, we can build and run the project directly from the terminal (root directory of the project):
+Before starting the application, make sure Docker is running — this is required for the MySQL container that hosts your project database.
+You can verify that Docker is running by using the command at the docker terminal:
+```bash
+docker ps
+```
+Expected:
+```
+CONTAINER ID   IMAGE       COMMAND                  CREATED      STATUS          PORTS                               NAMES     
+c10660064467   mysql:8.0   "docker-entrypoint.s…"   3 days ago   Up 14 seconds   0.0.0.0:3306->3306/tcp, 33060/tcp   cool-mysql
+```
+If the container list shows your MySQL container (e.g., cool_db), then Docker is active and ready.
+
+Next, build and run the Spring Boot project from the root directory:
 ```bash
 mvn clean install
 mvn spring-boot:run
@@ -542,17 +902,28 @@ mvn spring-boot:run
 
 Once running, Spring Boot automatically connects to the database defined in application.properties. Any entity classes you created earlier will be mapped to their respective tables in the database.
 
-
+---
 
 ## 7. Controllers Layer
 
-The Controller Layer is responsible for exposing REST endpoints to the outside world. Controllers receive HTTP requests (such as GET, POST, PUT, and DELETE) and delegate the business logic to the service or repository layers.
+The Controller Layer is responsible for exposing RESTful endpoints to external clients.
+Controllers handle incoming HTTP requests (such as GET, POST, PUT, and DELETE) and delegate the underlying operations to the appropriate repository or service layer.
 
-We plan to create controllers for each entity:
-- LocationController
-- AppUserController
-- RoleController
-- UserLocationController
+Each controller maps to a specific entity in the system and allows interaction with the database through defined endpoints.
+
+- AppUserController — Manages user accounts, including creation, retrieval, updates, and deletion. Handles linking users to roles and locations.
+
+- DeviceController — Manages devices and their related details such as type, condition, and status.
+
+- HomeController — Serves as the default entry point for the API, providing a welcome or health-check endpoint.
+
+- LocationController — Handles CRUD operations for locations such as community centers and departments.
+
+- UserLocationAccessController — Manages the relationship between users and locations where access permissions are assigned.
+
+- UserLocationController — Manages user-to-location assignments and relationships, ensuring proper mapping between entities.
+
+- UserRoleController — Handles CRUD operations for user roles, defining permissions and user types (e.g., Admin, Citizen, Technician).
 
 These controllers will eventually provide full CRUD endpoints for managing data. 
 
@@ -560,7 +931,276 @@ These controllers will eventually provide full CRUD endpoints for managing data.
 
 Before implementing entity-specific endpoints, we first confirm that Spring Boot is correctly serving HTTP responses. For this, we add a simple HomeController class:
 
-`Create HomeController.java class`
+`AppUserController.java`
+```java
+package com.example.prototypesetup.controller;
+
+import com.example.prototypesetup.entity.AppUser;
+import com.example.prototypesetup.entity.Location;
+import com.example.prototypesetup.entity.UserRole;
+import com.example.prototypesetup.repository.AppUserRepository;
+import com.example.prototypesetup.repository.LocationRepository;
+import com.example.prototypesetup.repository.UserRoleRepository;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+
+@RestController
+@RequestMapping("/api/app-users")
+public class AppUserController {
+
+    @Autowired
+    private AppUserRepository appUserRepository;
+
+    @Autowired
+    private UserRoleRepository userRoleRepository;
+
+    @Autowired
+    private LocationRepository locationRepository;
+
+    // GET all users
+    @GetMapping
+    public List<AppUser> getAllUsers() {
+        return appUserRepository.findAll();
+    }
+
+    //GET selected
+    @GetMapping("/{id}")
+    public ResponseEntity<AppUser> getUserById(@PathVariable("id") Long id) {
+    return appUserRepository.findById(id)
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
+    }
+
+    // CREATE user
+   @PostMapping
+    public AppUser createUser(@RequestBody AppUser user) {
+
+    // Set role
+    UserRole role = userRoleRepository.findById(user.getRole().getRoleId())
+        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Role not found"));
+
+    user.setRole(role);
+
+    // Set locations
+    if (user.getLocations() != null && !user.getLocations().isEmpty()) {
+    Set<Location> savedLocations = user.getLocations().stream()
+        .map(loc -> locationRepository.findById(loc.getLocationId())
+            .orElseThrow(() -> new RuntimeException("Location not found with id: " + loc.getLocationId())))
+        .collect(Collectors.toSet());
+    user.setLocations(savedLocations);
+    }
+
+    // Map password to password_hash
+    user.setPassword(user.getPassword()); // <- this sets the DB field
+    return appUserRepository.save(user);
+    }
+
+   // UPDATE user
+    @PutMapping("/{id}")
+    public ResponseEntity<AppUser> updateUser(@PathVariable("id") Long id, @RequestBody AppUser updatedUser) {
+    return appUserRepository.findById(id).map(user -> {
+        user.setFullName(updatedUser.getFullName());
+        user.setEmail(updatedUser.getEmail());
+        user.setPassword(updatedUser.getPassword());
+        user.setStreetAddress(updatedUser.getStreetAddress());
+        user.setCity(updatedUser.getCity());
+        user.setState(updatedUser.getState());
+        user.setZipCode(updatedUser.getZipCode());
+        user.setContactNumber(updatedUser.getContactNumber());
+        user.setDlNum(updatedUser.getDlNum());
+        user.setDlState(updatedUser.getDlState());
+        user.setDateOfBirth(updatedUser.getDateOfBirth());
+
+        if (updatedUser.getRole() != null) {
+    UserRole role = userRoleRepository.findById(updatedUser.getRole().getRoleId())
+    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Role not found"));
+    user.setRole(role);
+    }
+
+    if (updatedUser.getLocations() != null) {
+    Set<Location> updatedLocations = updatedUser.getLocations().stream()
+        .map(loc -> locationRepository.findById(loc.getLocationId())
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Location not found")))
+        .collect(Collectors.toSet());
+    user.setLocations(updatedLocations);
+    }
+
+        AppUser savedUser = appUserRepository.save(user);
+        return ResponseEntity.ok(savedUser);
+    }).orElse(ResponseEntity.notFound().build());
+    }
+
+    // DELETE user
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable("id") Long id) {
+    if (appUserRepository.existsById(id)) {
+        appUserRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
+    } else {
+        return ResponseEntity.notFound().build();
+        }
+    }
+}
+
+```
+
+---
+`DeviceController.java`
+```java
+package com.example.prototypesetup.controller;
+
+import com.example.prototypesetup.entity.Device;
+import com.example.prototypesetup.entity.DeviceStatus;
+import com.example.prototypesetup.entity.DeviceType;
+import com.example.prototypesetup.entity.AppUser;
+import com.example.prototypesetup.repository.DeviceRepository;
+import com.example.prototypesetup.repository.AppUserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import com.example.prototypesetup.repository.DeviceTypeRepository;
+import com.example.prototypesetup.repository.DeviceStatusRepository;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
+import java.util.Optional;
+
+@RestController
+@RequestMapping("/api/devices")
+public class DeviceController {
+
+//Class setup / Autowired fields
+@Autowired
+private DeviceRepository deviceRepository;
+
+@Autowired
+private AppUserRepository appUserRepository;
+
+
+@Autowired
+private DeviceTypeRepository deviceTypeRepository;
+
+@Autowired
+private DeviceStatusRepository deviceStatusRepository;
+
+
+
+    //GET all devices 
+    @GetMapping
+    public List<Device> getAllDevices() {
+        return deviceRepository.findAll();
+    }
+
+    //GET device by ID
+    @GetMapping("/{id}")
+    public ResponseEntity<Device> getDeviceById(@PathVariable("id") Long id) {
+        return deviceRepository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    //POST
+    @PostMapping
+    public ResponseEntity<Device> createDevice(@RequestBody Device device) {
+    // Validate createdBy user
+    if (device.getCreatedBy() != null) {
+    Optional<AppUser> user = appUserRepository.findById(device.getCreatedBy().getUserId());
+    if (!user.isPresent()) {
+        return ResponseEntity.badRequest().build();
+    }
+    device.setCreatedBy(user.get());
+    }
+
+    // Validate DeviceType
+    if (device.getType() != null) {
+    Optional<DeviceType> type = deviceTypeRepository.findById(device.getType().getDeviceTypeId());
+    if (!type.isPresent()) return ResponseEntity.badRequest().build();
+    device.setType(type.get());
+    }
+
+    // Validate DeviceStatus
+    if (device.getStatus() != null) {
+    Optional<DeviceStatus> status = deviceStatusRepository.findById(device.getStatus().getDeviceStatusId());
+    if (!status.isPresent()) return ResponseEntity.badRequest().build();
+    device.setStatus(status.get());
+    }
+
+    Device savedDevice = deviceRepository.save(device);
+    return ResponseEntity.ok(savedDevice);
+}
+
+    //PUT - Update existing device
+    @PutMapping("/{id}")
+    public ResponseEntity<Device> updateDevice(
+        @PathVariable("id") Long id,
+        @RequestBody Device updatedDevice) {
+
+    Device device = deviceRepository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Device not found"));
+
+    // Update name & serial number
+    if (updatedDevice.getDeviceName() != null) device.setDeviceName(updatedDevice.getDeviceName());
+    if (updatedDevice.getSerialNumber() != null) device.setSerialNumber(updatedDevice.getSerialNumber());
+
+    // Update DeviceType
+    if (updatedDevice.getType() != null) {
+        DeviceType type = deviceTypeRepository
+            .findById(updatedDevice.getType().getDeviceTypeId())
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid DeviceType ID"));
+        device.setType(type);
+    }
+
+    // Update DeviceStatus
+    if (updatedDevice.getStatus() != null) {
+        DeviceStatus status = deviceStatusRepository
+            .findById(updatedDevice.getStatus().getDeviceStatusId())
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid DeviceStatus ID"));
+        device.setStatus(status);
+    }
+
+    // Update location
+    if (updatedDevice.getLocation() != null) {
+        device.setLocation(updatedDevice.getLocation());
+    }
+
+    // Update createdBy user
+    if (updatedDevice.getCreatedBy() != null) {
+        AppUser user = appUserRepository
+            .findById(updatedDevice.getCreatedBy().getUserId())
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid User ID"));
+        device.setCreatedBy(user);
+    }
+
+    return ResponseEntity.ok(deviceRepository.save(device));
+}
+
+
+    //DELETE - Remove device by ID
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteDevice(@PathVariable("id") Long id) {
+        Optional<Device> optionalDevice = deviceRepository.findById(id);
+        if (optionalDevice.isPresent()) {
+            deviceRepository.delete(optionalDevice.get());
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
+}
+
+```
+
+---
+`HomeController.java`
 ```java
 package com.example.prototypesetup.controller;
 
@@ -576,19 +1216,9 @@ public class HomeController {
     }
 }
 ```
-When the application is running, visiting http://localhost:8080/ in a browser or testing via Postman should return:
 
-```
-Welcome to Prototype Setup!
-```
-This confirms that Spring Boot is:
-1. Successfully launching the embedded server.
-2. Able to route HTTP requests through a controller.
-3. Properly configured with annotations like @RestController and @GetMapping.
-
-
------
-`Create LocationController.java class`
+---
+`LocationController.java`
 ```java
 package com.example.prototypesetup.controller;
 
@@ -603,6 +1233,8 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+
 
 @RestController
 @RequestMapping("/api/locations")
@@ -611,254 +1243,244 @@ public class LocationController {
     @Autowired
     private LocationRepository locationRepository;
 
-    // GET all locations
+    //  GET all locations
     @GetMapping
     public List<Location> getAllLocations() {
         return locationRepository.findAll();
     }
 
-// DTO class inside the controller (or a separate file)
-public static class LocationDTO {
-    private Long locationId;
-    private String locationName;
-    private String address;
+    // DTO (optional lightweight response structure)
+    public static class LocationDTO {
+        private Integer locationId;
+        private String locationName;
+        private String address;
 
-      // No-args constructor (needed for Jackson serialization)
-    public LocationDTO() {}
+        public LocationDTO() {}
+        public LocationDTO(Integer locationId, String locationName, String address) {
+            this.locationId = locationId;
+            this.locationName = locationName;
+            this.address = address;
+        }
 
-    public LocationDTO(Long locationId, String locationName, String address) {
-        this.locationId = locationId;
-        this.locationName = locationName;
-        this.address = address;
+        public Integer getLocationId() { return locationId; }
+        public String getLocationName() { return locationName; }
+        public String getAddress() { return address; }
+
+        public void setLocationId(Integer locationId) { this.locationId = locationId; }
+        public void setLocationName(String locationName) { this.locationName = locationName; }
+        public void setAddress(String address) { this.address = address; }
     }
 
-    // Getters
-    public Long getLocationId() { return locationId; }
-    public String getLocationName() { return locationName; }
-    public String getAddress() { return address; }
+    // GET single location by ID
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getLocationById(@PathVariable("id") Integer id) {
+        Location location = locationRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Location not found with ID " + id));
 
-  // Setters
-    public void setLocationId(Long locationId) { this.locationId = locationId; }
-    public void setLocationName(String locationName) { this.locationName = locationName; }
-    public void setAddress(String address) { this.address = address; }
+        Map<String, Object> result = new HashMap<>();
+        result.put("locationId", location.getLocationId());
+        result.put("locationName", location.getLocationName());
+        result.put("address", location.getStreetAddress());
+        result.put("city", location.getCity());
+        result.put("state", location.getState());
+        result.put("zipCode", location.getZipCode());
 
+        return ResponseEntity.ok(result);
+    }
 
-}
-
-
-@GetMapping("/{id}")
-public ResponseEntity<?> getLocationTest(@PathVariable("id") Long id) {
-    Location location = locationRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Location not found with id " + id));
-
-    Map<String, Object> result = new HashMap<>();
-    result.put("locationId", location.getLocationId());
-    result.put("locationName", location.getLocationName());
-    result.put("address", location.getAddress());
-
-    return ResponseEntity.ok(result);
-}
-
-    // CREATE location
+    // CREATE new location
     @PostMapping
-    public Location createLocation(@RequestBody Location location) {
-        return locationRepository.save(location);
+    public ResponseEntity<Location> createLocation(@RequestBody Location location) {
+        if (location.getLocationName() == null || location.getLocationName().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Location name is required");
+        }
+        Location saved = locationRepository.save(location);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
-// UPDATE location
-@PutMapping("/{id}")
-public ResponseEntity<Location> updateLocation(@PathVariable("id") Long id, @RequestBody Location updatedLocation) {
+    // UPDATE existing location
+    @PutMapping("/{id}")
+    public ResponseEntity<Location> updateLocation(@PathVariable("id") Integer id, @RequestBody Location updatedLocation) {
     Location location = locationRepository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Location not found with id " + id));
 
     location.setLocationName(updatedLocation.getLocationName());
-    location.setAddress(updatedLocation.getAddress());
+    location.setStreetAddress(updatedLocation.getStreetAddress());
+    location.setCity(updatedLocation.getCity());
+    location.setState(updatedLocation.getState());
+    location.setZipCode(updatedLocation.getZipCode());
+    location.setContactNumber(updatedLocation.getContactNumber());
 
     Location savedLocation = locationRepository.save(location);
     return ResponseEntity.ok(savedLocation);
 }
 
-// DELETE location safely
-@DeleteMapping("/{id}")
-public ResponseEntity<Void> deleteLocation(@PathVariable("id") Long id) {
-    Location location = locationRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Location not found with id " + id));
-
-    // Remove associations with users to avoid foreign key constraint issues
-    location.getUsers().forEach(user -> user.getLocations().remove(location));
-
-    locationRepository.delete(location);
-    return ResponseEntity.noContent().build(); // HTTP 204 No Content
-}
-
-}
-
-```
------
-`Create AppUserController.java class`
-```java
-package com.example.prototypesetup.controller;
-
-import com.example.prototypesetup.entity.AppUser;
-import com.example.prototypesetup.repository.AppUserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-
-@RestController
-@RequestMapping("/api/users")
-public class AppUserController {
-
-    @Autowired
-    private AppUserRepository appUserRepository;
-
-    // GET all users
-    @GetMapping
-    public List<AppUser> getAllUsers() {
-        return appUserRepository.findAll();
-    }
-
-    @GetMapping("/{id}")
-public ResponseEntity<AppUser> getUserById(@PathVariable("id") Long id) {
-    return appUserRepository.findById(id)
-            .map(ResponseEntity::ok)
-            .orElse(ResponseEntity.notFound().build());
-}
-
-    // CREATE user
-    @PostMapping
-    public AppUser createUser(@RequestBody AppUser user) {
-        return appUserRepository.save(user);
-    }
-
-    // UPDATE user
-@PutMapping("/{id}")
-public ResponseEntity<AppUser> updateUser(@PathVariable("id") Long id, @RequestBody AppUser updatedUser) {
-    return appUserRepository.findById(id).map(user -> {
-        user.setUsername(updatedUser.getUsername());
-        user.setEmail(updatedUser.getEmail());
-        user.setPassword(updatedUser.getPassword());
-        if (updatedUser.getRole() != null) {
-            user.setRole(updatedUser.getRole());
+    // DELETE a location
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteLocation(@PathVariable("id") Integer id) {
+        Optional<Location> optionalLocation = locationRepository.findById(id);
+        if (optionalLocation.isPresent()) {
+            locationRepository.delete(optionalLocation.get());
+            return ResponseEntity.noContent().build();
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Location not found with ID " + id);
         }
-        AppUser savedUser = appUserRepository.save(user);
-        return ResponseEntity.ok(savedUser);
-    }).orElse(ResponseEntity.notFound().build());
-}
-
-
-    // DELETE user
-    @DeleteMapping("/{id}")
-public ResponseEntity<Void> deleteUser(@PathVariable("id") Long id) {
-    if (appUserRepository.existsById(id)) {
-        appUserRepository.deleteById(id);
-        return ResponseEntity.noContent().build();
-    } else {
-        return ResponseEntity.notFound().build();
     }
 }
-
-}
-
 ```
------
-`Create RoleController.java class`
+
+---
+`UserLocationAccessController.java`
 ```java
-package com.example.prototypesetup.controller;
-
-import com.example.prototypesetup.entity.Role;
-import com.example.prototypesetup.repository.RoleRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
-import org.springframework.http.HttpStatus;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-@RestController
-@RequestMapping("/api/roles")
-public class RoleController {
-
-    @Autowired
-    private RoleRepository roleRepository;
-
-    // GET all roles
-    @GetMapping
-    public List<Role> getAllRoles() {
-        return roleRepository.findAll();
-    }
-
-    // GET role by ID safely
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getRoleById(@PathVariable("id") Long id) {
-        Role role = roleRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Role not found with id " + id));
-
-        Map<String, Object> result = new HashMap<>();
-        result.put("roleId", role.getRoleId());
-        result.put("roleName", role.getRoleName());
-
-        return ResponseEntity.ok(result);
-    }
-
-    // CREATE role
-    @PostMapping
-    public Role createRole(@RequestBody Role role) {
-        return roleRepository.save(role);
-    }
-
-    // UPDATE role
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updateRole(@PathVariable("id") Long id, @RequestBody Role updatedRole) {
-        Role role = roleRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Role not found with id " + id));
-
-        role.setRoleName(updatedRole.getRoleName());
-        roleRepository.save(role);
-
-        Map<String, Object> result = new HashMap<>();
-        result.put("roleId", role.getRoleId());
-        result.put("roleName", role.getRoleName());
-
-        return ResponseEntity.ok(result);
-    }
-
-    // DELETE role safely
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteRole(@PathVariable("id") Long id) {
-        Role role = roleRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Role not found with id " + id));
-
-
-
-        roleRepository.delete(role);
-        return ResponseEntity.noContent().build();
-    }
-}
-```
-----
-`Create UserLocationController.java class (Optional)`
-```java 
 package com.example.prototypesetup.controller;
 
 import com.example.prototypesetup.entity.AppUser;
 import com.example.prototypesetup.entity.Location;
-import com.example.prototypesetup.entity.UserLocation;
+import com.example.prototypesetup.entity.UserLocationAccess;
+import com.example.prototypesetup.entity.UserLocationAccessId;
 import com.example.prototypesetup.repository.AppUserRepository;
 import com.example.prototypesetup.repository.LocationRepository;
-import com.example.prototypesetup.repository.UserLocationRepository;
+import com.example.prototypesetup.repository.UserLocationAccessRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 
-import java.time.LocalDateTime;
 import java.util.List;
+
+@RestController
+@RequestMapping("/api/user-locations-access")
+public class UserLocationAccessController {
+
+    @Autowired
+    private UserLocationAccessRepository userLocationRepository;
+
+    @Autowired
+    private AppUserRepository appUserRepository;
+
+    @Autowired
+    private LocationRepository locationRepository;
+
+    // GET all user-location links
+    @GetMapping
+    public List<UserLocationAccess> getAll() {
+        return userLocationRepository.findAll();
+    }
+
+    // GET one by ID
+   // GET one by ID
+    @GetMapping("/{userId}/{locationId}")
+    public ResponseEntity<UserLocationAccess> getById(
+        @PathVariable("userId") Long userId,
+        @PathVariable("locationId") Integer locationId) {
+
+    UserLocationAccessId id = new UserLocationAccessId(userId, locationId);
+    return userLocationRepository.findById(id)
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
+    }
+
+    // DTO for create request
+    public static class UserLocationCreateRequest {
+    public Long userId;
+    public Integer locationId;
+    }
+
+    // POST
+    @PostMapping
+    public ResponseEntity<UserLocationAccess> create(@RequestBody UserLocationCreateRequest request) {
+    AppUser user = appUserRepository.findById(request.userId).orElse(null);
+    Location location = locationRepository.findById(request.locationId).orElse(null);
+
+    if (user == null || location == null) {
+        return ResponseEntity.badRequest().build();
+    }
+
+    UserLocationAccess ul = new UserLocationAccess();
+    ul.setAppUser(user);
+    ul.setLocation(location);
+
+    return ResponseEntity.ok(userLocationRepository.save(ul));
+    }
+
+    // DTO for update request
+    public static class UserLocationUpdateRequest {
+    public Long newUserId;
+    public Integer newLocationId;
+    }
+
+    // UPDATE (reassign user or location)
+    @PutMapping("/{userId}/{locationId}")
+    public ResponseEntity<UserLocationAccess> update(
+        @PathVariable("userId") Long userId,
+        @PathVariable("locationId") Integer locationId,
+        @RequestBody UserLocationUpdateRequest request) {
+
+    UserLocationAccessId oldId = new UserLocationAccessId(userId, locationId);
+    Optional<UserLocationAccess> optionalUL = userLocationRepository.findById(oldId);
+
+    //if not found = return 404
+    if (!optionalUL.isPresent()) {
+        return ResponseEntity.notFound().build();
+    }
+
+    // update existing
+    UserLocationAccess ul = optionalUL.get();
+
+    if (request.newUserId != null) {
+        AppUser newUser = appUserRepository.findById(request.newUserId).orElse(null);
+        if (newUser == null) return ResponseEntity.badRequest().build();
+        ul.setAppUser(newUser);
+    }
+
+    if (request.newLocationId != null) {
+        Location newLocation = locationRepository.findById(request.newLocationId).orElse(null);
+        if (newLocation == null) return ResponseEntity.badRequest().build();
+        ul.setLocation(newLocation);
+    }
+
+    // save and return updated relationship
+    UserLocationAccess updated = userLocationRepository.save(ul);
+    return ResponseEntity.ok(updated);
+    }
+
+     // DELETE link
+    @DeleteMapping("/{userId}/{locationId}")
+    public ResponseEntity<Void> deleteUserLocation(
+        @PathVariable("userId") Long userId,
+        @PathVariable("locationId") Integer locationId) {
+
+    UserLocationAccessId id = new UserLocationAccessId(userId, locationId);
+
+    if (userLocationRepository.existsById(id)) {
+        userLocationRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
+    } else {
+        return ResponseEntity.notFound().build();
+        }
+    }
+
+}
+```
+
+---
+`UserLocationController.java`
+```java
+package com.example.prototypesetup.controller;
+
+import com.example.prototypesetup.entity.UserLocation;
+import com.example.prototypesetup.entity.UserLocationId;
+import com.example.prototypesetup.entity.AppUser;
+import com.example.prototypesetup.entity.Location;
+import com.example.prototypesetup.repository.UserLocationRepository;
+import com.example.prototypesetup.repository.AppUserRepository;
+import com.example.prototypesetup.repository.LocationRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/user-locations")
@@ -873,87 +1495,144 @@ public class UserLocationController {
     @Autowired
     private LocationRepository locationRepository;
 
-    // GET all user-location links
+    // GET all
     @GetMapping
-    public List<UserLocation> getAll() {
+    public List<UserLocation> getAllUserLocations() {
         return userLocationRepository.findAll();
     }
 
-    // GET one by ID
-    @GetMapping("/{id}")
-    public ResponseEntity<UserLocation> getById(@PathVariable("id") Long id) {
-        return userLocationRepository.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+   // GET one by composite key
+    @GetMapping("/{userId}/{locationId}")
+    public ResponseEntity<UserLocation> getById(
+        @PathVariable("userId") Long userId,
+        @PathVariable("locationId") Integer locationId) {
+
+    UserLocationId id = new UserLocationId();
+    id.setUserId(userId);       // match your UserLocationId field names
+    id.setLocationId(locationId);
+
+    return userLocationRepository.findById(id)
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.notFound().build());
     }
 
-    // CREATE link (pass userId + locationId) 
-    @PostMapping public ResponseEntity<UserLocation> create( @RequestParam("userId") Long userId, @RequestParam("locationId") Long locationId) {
-        AppUser user = appUserRepository.findById(userId).orElse(null); 
-        Location location = locationRepository.findById(locationId).orElse(null); 
-        
-        if (user == null || location == null) { 
-        return ResponseEntity.badRequest().build(); 
-        } 
-        
-        UserLocation ul = new UserLocation(); 
-        ul.setUser(user); 
-        ul.setLocation(location); 
-        ul.setAssignedAt(LocalDateTime.now()); 
-        
-        return ResponseEntity.ok(userLocationRepository.save(ul)); 
-    }
-    
 
- // UPDATE (reassign user or location)
+    // POST (create new association)
+    @PostMapping
+    public ResponseEntity<UserLocation> createUserLocation(@RequestBody UserLocation userLocation) {
+        Optional<AppUser> user = appUserRepository.findById(userLocation.getUser().getUserId());
+        Optional<Location> location = locationRepository.findById(userLocation.getLocation().getLocationId());
 
-// DTO for update request
-public static class UserLocationUpdateRequest {
-    public Long userId;
-    public Long locationId;
-}
+        if (!user.isPresent() || !location.isPresent()) {
+            return ResponseEntity.badRequest().build();
+        }
 
-@PutMapping("/{id}")
-public ResponseEntity<UserLocation> update(
-        @PathVariable("id") Long id,
-        @RequestBody UserLocationUpdateRequest request) {
+        userLocation.setUser(user.get());
+        userLocation.setLocation(location.get());
+        userLocation.setId(new UserLocationId(user.get().getUserId(), location.get().getLocationId()));
 
-    Optional<UserLocation> optionalUL = userLocationRepository.findById(id);
-    if (!optionalUL.isPresent()) {
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(userLocationRepository.save(userLocation));
     }
 
-    AppUser user = appUserRepository.findById(request.userId).orElse(null);
-    Location location = locationRepository.findById(request.locationId).orElse(null);
 
-    if (user == null || location == null) {
-        return ResponseEntity.badRequest().build();
-    }
+    // DELETE user-location link
+    @DeleteMapping("/{userId}/{locationId}")
+    public ResponseEntity<Void> deleteUserLocation(
+        @PathVariable("userId") Long userId,
+        @PathVariable("locationId") Integer locationId) {
 
-    UserLocation ul = optionalUL.get();
-    ul.setUser(user);
-    ul.setLocation(location);
-    ul.setAssignedAt(LocalDateTime.now());
+    UserLocationId id = new UserLocationId(userId, locationId);
 
-    return ResponseEntity.ok(userLocationRepository.save(ul));
-}
-
-
-  // DELETE link
-@DeleteMapping("/{id}")
-public ResponseEntity<Void> delete(@PathVariable("id") Long id) {
-    Optional<UserLocation> optionalUL = userLocationRepository.findById(id);
-
-    if (optionalUL.isPresent()) {
-        userLocationRepository.delete(optionalUL.get());
-        return ResponseEntity.noContent().build();
+    if (userLocationRepository.existsById(id)) {
+        userLocationRepository.deleteById(id);
+        return ResponseEntity.noContent().build(); // 204
     } else {
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.notFound().build(); // 404
+        }
     }
-}
 
 }
 ```
+
+---
+`UserRoleController.java`
+```java
+package com.example.prototypesetup.controller;
+
+import com.example.prototypesetup.entity.UserRole;
+import com.example.prototypesetup.repository.UserRoleRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/user-roles")
+public class UserRoleController {
+
+    @Autowired
+    private UserRoleRepository roleRepository;
+
+    // GET all roles
+    @GetMapping
+    public List<UserRole> getAllRoles() {
+        return roleRepository.findAll();
+    }
+
+     // GET role by ID
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getRoleById(@PathVariable(name = "id") Long id) {
+    UserRole role = roleRepository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Role not found with id " + id));
+
+    Map<String, Object> result = new HashMap<>();
+    result.put("roleId", role.getRoleId());
+    result.put("roleName", role.getRoleName());
+
+    return ResponseEntity.ok(result);
+    }
+
+
+    // CREATE role
+    @PostMapping
+    public UserRole createRole(@RequestBody UserRole role) {
+        return roleRepository.save(role);
+    }
+
+     // UPDATE role
+    @PutMapping("/{id}")
+    public UserRole updateRole(@PathVariable("id") Long id, @RequestBody UserRole updatedRole) {
+    UserRole role = roleRepository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Role not found with id " + id));
+
+    role.setRoleName(updatedRole.getRoleName());
+    role.setDlRequired(updatedRole.isDlRequired());
+    role.setActive(updatedRole.isActive());
+
+    return roleRepository.save(role);
+    }
+
+
+    // DELETE role
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteRole(@PathVariable("id") Long id) {
+    UserRole role = roleRepository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Role not found with id " + id));
+
+    roleRepository.delete(role);
+    return ResponseEntity.noContent().build();
+    }
+
+}
+
+```
+
+---
 
 ## 8 Complete Folder with all classesd and files
 The image below shows the complete folder structure of the project with all classes and files in place. This provides a quick visual reference for where each component lives (entities, repositories, services, controllers, configuration, and resources).

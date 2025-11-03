@@ -7,7 +7,7 @@ services:
 
     # Port mapping
     ports:
-      - "3307:3307"
+      - "3307:3306"
 
     # Environment variables
     environment:

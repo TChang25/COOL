@@ -1,19 +1,20 @@
 package com.example.prototypesetup.controller;
 
-import com.example.prototypesetup.entity.Device;
-import com.example.prototypesetup.entity.AppUser;
-import com.example.prototypesetup.repository.DeviceRepository;
-import com.example.prototypesetup.repository.AppUserRepository;
+import com.example.prototypesetup.entity.*;
+import com.example.prototypesetup.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/devices")
 public class DeviceController {
+
+//Class setup / Autowired fields
 
     @Autowired
     private DeviceRepository deviceRepository;
@@ -21,67 +22,106 @@ public class DeviceController {
     @Autowired
     private AppUserRepository appUserRepository;
 
-    //GET all devices
+    @Autowired
+    private DeviceTypeRepository deviceTypeRepository;
+
+    @Autowired
+    private DeviceStatusRepository deviceStatusRepository;
+
+    @Autowired
+    private LocationRepository locationRepository;
+
+    // GET all devices
     @GetMapping
     public List<Device> getAllDevices() {
         return deviceRepository.findAll();
     }
 
-    //GET device by ID
+    // GET device by ID
     @GetMapping("/{id}")
     public ResponseEntity<Device> getDeviceById(@PathVariable("id") Long id) {
         return deviceRepository.findById(id)
                 .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Device not found with ID " + id));
     }
 
- @PostMapping
-public ResponseEntity<Device> createDevice(@RequestBody Device device) {
-    if (device.getUser() != null) {
-        Optional<AppUser> user = appUserRepository.findById(device.getUser().getUserId());
-        if (!user.isPresent()) {  // use this instead of isEmpty()
-            return ResponseEntity.badRequest().build();
+    // POST - Create new device
+    @PostMapping
+    public ResponseEntity<Device> createDevice(@RequestBody Device device) {
+        // Validate relationships
+        if (device.getType() != null) {
+            DeviceType type = deviceTypeRepository.findById(device.getType().getDeviceTypeId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid DeviceType ID"));
+            device.setType(type);
         }
-        device.setUser(user.get());
+
+        if (device.getStatus() != null) {
+            DeviceStatus status = deviceStatusRepository.findById(device.getStatus().getDeviceStatusId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid DeviceStatus ID"));
+            device.setStatus(status);
+        }
+
+        if (device.getLocation() != null) {
+            Location location = locationRepository.findById(device.getLocation().getLocationId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid Location ID"));
+            device.setLocation(location);
+        }
+
+        if (device.getCreatedBy() != null) {
+            AppUser user = appUserRepository.findById(device.getCreatedBy().getUserId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid User ID"));
+            device.setCreatedBy(user);
+        }
+
+        Device savedDevice = deviceRepository.save(device);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedDevice);
     }
-    Device savedDevice = deviceRepository.save(device);
-    return ResponseEntity.ok(savedDevice);
-}
 
-
-    //PUT - Update existing device
+    // PUT - Update existing device
     @PutMapping("/{id}")
-    public ResponseEntity<Device> updateDevice(
-            @PathVariable("id") Long id,
-            @RequestBody Device updatedDevice) {
+    public ResponseEntity<Device> updateDevice(@PathVariable("id") Long id, @RequestBody Device updatedDevice) {
+        Device device = deviceRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Device not found with ID " + id));
 
-        Optional<Device> optionalDevice = deviceRepository.findById(id);
-        if (!optionalDevice.isPresent()) {
-            return ResponseEntity.notFound().build();
+        if (updatedDevice.getDeviceName() != null)
+            device.setDeviceName(updatedDevice.getDeviceName());
+        if (updatedDevice.getSerialNumber() != null)
+            device.setSerialNumber(updatedDevice.getSerialNumber());
+
+        if (updatedDevice.getType() != null) {
+            DeviceType type = deviceTypeRepository.findById(updatedDevice.getType().getDeviceTypeId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid DeviceType ID"));
+            device.setType(type);
         }
 
-        Device device = optionalDevice.get();
-        device.setStatus(updatedDevice.getStatus());
-        device.setType(updatedDevice.getType());
-
-        if (updatedDevice.getUser() != null) {
-            AppUser user = appUserRepository.findById(updatedDevice.getUser().getUserId()).orElse(null);
-            if (user != null) {
-                device.setUser(user);
-            }
+        if (updatedDevice.getStatus() != null) {
+            DeviceStatus status = deviceStatusRepository.findById(updatedDevice.getStatus().getDeviceStatusId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid DeviceStatus ID"));
+            device.setStatus(status);
         }
 
-        return ResponseEntity.ok(deviceRepository.save(device));
+        if (updatedDevice.getLocation() != null) {
+            Location location = locationRepository.findById(updatedDevice.getLocation().getLocationId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid Location ID"));
+            device.setLocation(location);
+        }
+
+        if (updatedDevice.getCreatedBy() != null) {
+            AppUser user = appUserRepository.findById(updatedDevice.getCreatedBy().getUserId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid User ID"));
+            device.setCreatedBy(user);
+        }
+
+        Device saved = deviceRepository.save(device);
+        return ResponseEntity.ok(saved);
     }
 
-    //DELETE - Remove device by ID
+    // DELETE - Remove a device
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteDevice(@PathVariable("id") Long id) {
-        Optional<Device> optionalDevice = deviceRepository.findById(id);
-        if (optionalDevice.isPresent()) {
-            deviceRepository.delete(optionalDevice.get());
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
+        Device device = deviceRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Device not found with ID " + id));
+        deviceRepository.delete(device);
+        return ResponseEntity.noContent().build();
     }
 }
