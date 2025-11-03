@@ -21,6 +21,7 @@ const StyledContainer = styled(Paper)(({ theme }) => ({
   overflow: "hidden",
   backgroundColor: theme.palette.primary.main,
   padding: theme.spacing(6),
+  width: "94%",
   [theme.breakpoints.down("md")]: {
     padding: theme.spacing(3),
     margin: theme.spacing(2),
@@ -267,10 +268,6 @@ export default function UsageStatistics() {
                   direction: "row",
                   position: { vertical: "bottom", horizontal: "middle" },
                   padding: { top: 20 },
-                  itemMarkWidth: 16,
-                  itemMarkHeight: 16,
-                  markGap: 8,
-                  itemGap: 20,
                 },
               }}
               sx={{
