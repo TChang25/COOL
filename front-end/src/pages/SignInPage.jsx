@@ -104,6 +104,8 @@ const [formData, setFormData] = useState({
           <Button type="submit" varianttype="sign">
             Sign In
           </Button>
+          <Box sx={{display: "flex", justifyContent: "space-around"}}>
+
           <Link
             to="/signIn"
             style={{
@@ -115,6 +117,18 @@ const [formData, setFormData] = useState({
           >
             Forgot password?
           </Link>
+          <Link
+            to="/"
+            style={{
+              color: "#2C2C2C",
+              fontStyle: "italic",
+              textDecoration: "underline",
+              textAlign: "left",
+            }}
+          >
+            Return Home
+          </Link>
+          </Box>
         </Box>
       </Box>
     </Box>
