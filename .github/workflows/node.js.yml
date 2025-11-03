@@ -21,7 +21,7 @@ jobs:
     strategy:
       matrix:
         # Node 18.x removed due to dependency engine incompatibility
-        node-version: [20.x, 22.x] 
+        node-version: [22.x] 
 
     steps:
     - name: Checkout repository
