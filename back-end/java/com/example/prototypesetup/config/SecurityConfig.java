@@ -35,7 +35,6 @@ public class SecurityConfig {
             );
     }
 
-
     private final RsaKeyProperties rsaKeys;
     
     public SecurityConfig(RsaKeyProperties rsaKeys) {
