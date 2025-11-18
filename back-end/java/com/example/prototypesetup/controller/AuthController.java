@@ -47,7 +47,7 @@ public class AuthController {
             Authentication authentication = new UsernamePasswordAuthenticationToken(
                 email, 
                 null, 
-                Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole().getRoleName()))
+                Collections.singletonList(new SimpleGrantedAuthority(user.getRole().getRoleName()))
             );
             
             // Generate JWT token

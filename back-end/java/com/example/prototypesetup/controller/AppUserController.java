@@ -4,6 +4,7 @@ import com.example.prototypesetup.entity.*;
 import com.example.prototypesetup.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
