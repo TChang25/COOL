@@ -147,4 +147,4 @@ vite.config.ts.timestamp-*
 # Keep the template version
 !.env.sample
 
-*/target
+**/target/
