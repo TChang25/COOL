@@ -73,6 +73,30 @@ const StyledButton = styled(MUIButton)(({ theme, varianttype }) => ({
     borderRadius: "10px",
   }),
 
+  ...(varianttype === "create" && {
+    backgroundColor: "#fff",
+    color: "#2C2C2C",
+    "&:hover": { backgroundColor: "#fff" },
+    width: "160px",
+    height: "40px",
+  }),
+
+  ...(varianttype === "edit" && {
+    backgroundColor: "#FFF",
+    color: "#2C2C2C",
+    "&:hover": { backgroundColor: "#FFF" },
+    width: "80px",
+    height: "40px",
+  }),
+
+  ...(varianttype === "delete" && {
+    backgroundColor: "#D22630",
+    color: "#fff",
+    "&:hover": { backgroundColor: "#D22630" },
+    width: "80px",
+    height: "40px",
+  }),
+
   ...(varianttype === "nearest" && {
     backgroundColor: theme.palette.secondary.main,
     color: theme.palette.secondary.contrastText,
