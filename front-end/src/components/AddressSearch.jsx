@@ -82,19 +82,19 @@ const AddressSearch = ({ onSearch, initialAddress = "" }) => {
       }}
     >
       {/* the "Menu" icon doesn't do anything yet, it's just decorative */}
-      <IconButton disableRipple sx={{ mr: 1 }}>
+      {/* <IconButton disableRipple sx={{ mr: 1 }}>
         <MenuIcon />
-      </IconButton>
+      </IconButton> */}
 
       {/* The text input where the user enters the address */}
       <InputBase
         fullWidth // makes the input expand to fill all available horizontal space
-        placeholder="Enter an Address to Find a Nearby Center" // placeholer text, can be changed to something else
+        placeholder="Enter your house number and street name" // placeholer text, can be changed to something else
         inputProps={{ "aria-label": "search address" }} // provides an name for screen readers (accessibility)
         value={value} // binds the input box to React state
         onChange={(e) => setValue(e.target.value)} // updates state when the user types
         onKeyDown={(e) => e.key === "Enter" && doSearch()} // pressing Enter triggers the search
-        sx={{ fontSize: 20, lineHeight: 1.2, py: 1 }}
+        sx={{ fontSize: 20, lineHeight: 1.2, py: 1, marginLeft: 3 }}
       />
 
       {/* Search icon button that triggers doSearch() when clicked */}

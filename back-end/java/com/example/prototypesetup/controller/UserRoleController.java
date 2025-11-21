@@ -10,7 +10,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/user-roles")
+@RequestMapping("/api/user_roles")
 public class UserRoleController {
 
     @Autowired
@@ -43,7 +43,7 @@ public ResponseEntity<UserRole> getRoleById(@PathVariable("id") Long id) {
     }
 
     // UPDATE existing role
-@PutMapping("/{id}")
+@PatchMapping("/{id}")
 public ResponseEntity<UserRole> updateRole(@PathVariable("id") Long id,
                                            @RequestBody UserRole updatedRole) {
     return roleRepository.findById(id).map(role -> {
