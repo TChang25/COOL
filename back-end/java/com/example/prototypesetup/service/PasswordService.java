@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 public class PasswordService {
 
     /*
-        Argon2 parameters explained:
+        Argon2 parameters:
         saltLength: Length of the random salt (in bytes) added to each password
         hashLength: Length of the resulting hash (in bytes)
         parallelism: Number of threads and computational lanes (higher = more CPU usage)
