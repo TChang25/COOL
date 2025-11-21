@@ -51,34 +51,14 @@
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
 
-<<<<<<< HEAD
         <!-- MySQL driver (new coordinates, avoids relocation warning) -->
-=======
-        <!-- MySQL Connector -->
->>>>>>> 1059cb2 (Current chnages:)
         <dependency>
-<<<<<<< HEAD
             <groupId>com.mysql</groupId>
             <artifactId>mysql-connector-j</artifactId>
             <scope>runtime</scope>
         </dependency>
 
         <!-- Lombok -->
-=======
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.33</version>
-            <scope>runtime</scope>
-        </dependency>
-
-        <!-- Lombok (reduces boilerplate getters/setters) -->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.18.32</version>
-            <scope>provided</scope>
-        </dependency>
->>>>>>> 19b75b8 (JWT Authentication (#135))
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -86,11 +66,7 @@
             <scope>provided</scope>
         </dependency>
 
-<<<<<<< HEAD
         <!-- Testing (JUnit + Spring test + Mockito) -->
-=======
-        <!-- Spring Boot Test (JUnit 5 + Mockito) -->
->>>>>>> 1059cb2 (Current chnages:)
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
