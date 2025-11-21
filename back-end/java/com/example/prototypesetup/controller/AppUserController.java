@@ -2,15 +2,13 @@ package com.example.prototypesetup.controller;
 
 import com.example.prototypesetup.entity.*;
 import com.example.prototypesetup.repository.*;
+import com.example.prototypesetup.service.PasswordService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 
 @RestController
@@ -26,6 +24,9 @@ public class AppUserController {
 
     @Autowired
     private UserRoleRepository userRoleRepository;
+    
+    @Autowired
+    private PasswordService passwordService;
 
     // GET all users
     @GetMapping
@@ -54,6 +55,11 @@ public ResponseEntity<AppUser> createUser(@RequestBody AppUser user) {
     UserRole role = userRoleRepository.findById(user.getRole().getRoleId())
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Role not found"));
     user.setRole(role);
+    
+    // Hash the password before saving
+    if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+        user.setPassword(passwordService.hashPassword(user.getPassword()));
+    }
 
     // Handle location access
     if (user.getLocationAccess() != null) {
@@ -80,7 +86,7 @@ public ResponseEntity<AppUser> createUser(@RequestBody AppUser user) {
         return appUserRepository.findById(id).map(user -> {
             user.setFullName(updatedUser.getFullName());
             user.setEmail(updatedUser.getEmail());
-            user.setPassword(updatedUser.getPassword());
+            user.setPassword(passwordService.hashPassword(updatedUser.getPassword()));
             user.setStreetAddress(updatedUser.getStreetAddress());
             user.setCity(updatedUser.getCity());
             user.setState(updatedUser.getState());
