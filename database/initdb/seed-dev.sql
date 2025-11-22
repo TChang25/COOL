@@ -109,10 +109,10 @@ INSERT INTO transaction_status (transaction_status_name) VALUES
 -- Admin users
 INSERT INTO app_user (full_name, email, password_hash, user_role_id)
 VALUES 
-    ('Dev Admin', 'dev@workemail.com', 'hashed_pw_here', 1), -- Dev Admin role (1)
-    ('Mgr Admin', 'admin@workemail.com', 'hashed_pw_here', 1), -- Mgr Admin role (1)
-    ('Employee One', 'emp1@workemail.com', 'hashed_pw_here', 2), -- Employee role (2)
-    ('Employee Two', 'emp2@workemail.com', 'hashed_pw_here', 2); -- Employee role (2)
+    ('Dev Admin', 'dev@workemail.com', '$argon2id$v=19$m=4000,t=3,p=1$ZFc2YTM0SnA1VjVnMWdoRQ$aSCMbMP1BX83Ig5gazFb7pY9ssHYowimymM8N2cu3MI', 1), -- Dev Admin role (1) "devPassword123"
+    ('Mgr Admin', 'admin@workemail.com', '$argon2id$v=19$m=4000,t=3,p=1$ZFc2YTM0SnA1VjVnMWdoRQ$v7YFt27G7aaipNUGX0yflfKRLdrITPencnTYB2mptH0', 1), -- Mgr Admin role (1) "adminPassword123"
+    ('Employee One', 'emp1@workemail.com', '$argon2id$v=19$m=4000,t=3,p=1$ZFc2YTM0SnA1VjVnMWdoRQ$o8EFjXCkE6JXnHsdVhyNM8FckPl2ePTpsCsEJcP+5Q0', 2), -- Employee role (2) "emp1Password123"
+    ('Employee Two', 'emp2@workemail.com', '$argon2id$v=19$m=4000,t=3,p=1$ZFc2YTM0SnA1VjVnMWdoRQ$CRuc039eBTfYqR0QsRhjPrGRW6S0hP5QwslzKBfs2co', 2); -- Employee role (2) "emp2Password123"
 
 -- Citizen user (borrowers with full contact info)
 INSERT INTO app_user (full_name, email, password_hash, user_role_id, dl_num, dl_state, address, city, state, zip_code, date_of_birth, contact_number)

@@ -1,4 +1,3 @@
-
 services:
   db:
     image: mysql:8.0
@@ -22,6 +21,30 @@ services:
       - db_data:/var/lib/mysql 
       # Initialize schema on first run
       - ./initdb:/docker-entrypoint-initdb.d 
+
+  # OpenSSL service for RSA key generation
+  # Run service with: docker-compose -f database/docker-compose.yaml --profile openssl run --rm rsakeys              
+  rsakeys:
+    image: alpine/openssl:latest
+    container_name: cool-openssl
+    entrypoint: ["sh", "-c"]
+    working_dir: /certs
+    volumes:
+      - ../back-end/resources/certs:/certs
+    profiles:
+      - openssl
+    command: |
+      "if [ ! -f /certs/private.pem ]; then
+        echo 'Generating RSA keys...' &&
+        openssl genrsa -out /certs/keypair.pem 2048 &&
+        openssl rsa -in /certs/keypair.pem -pubout -out /certs/public.pem &&
+        openssl pkcs8 -topk8 -inform PEM -outform PEM -nocrypt -in /certs/keypair.pem -out /certs/private.pem &&
+        rm /certs/keypair.pem &&
+        echo 'Keys generated successfully!'
+      else
+        echo 'No generation, RSA keys already exist!'
+      fi"
+
 # Declares the named volume for MySQL data persistence
 volumes:
-  db_data: 
+  db_data:
