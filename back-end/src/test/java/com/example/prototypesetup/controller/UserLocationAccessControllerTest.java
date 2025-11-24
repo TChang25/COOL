@@ -1,4 +1,4 @@
-package com.example.prototypesetup;
+package com.example.prototypesetup.controller;
 
 import com.example.prototypesetup.controller.UserLocationAccessController;
 import com.example.prototypesetup.entity.*;
