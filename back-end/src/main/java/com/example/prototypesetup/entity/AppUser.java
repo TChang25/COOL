@@ -16,6 +16,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Table(name = "app_user")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class AppUser {
@@ -23,6 +24,7 @@ public class AppUser {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "app_user_id")
+    @EqualsAndHashCode.Include
     private Long userId;
 
     @Column(name = "full_name", nullable = false, length = 100)
