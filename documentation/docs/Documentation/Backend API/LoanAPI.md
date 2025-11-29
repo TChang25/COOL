@@ -5,7 +5,6 @@ The Loan API manages the lending and returning of devices within the system.
 It tracks loan details such as start date, due date, and condition status while ensuring accurate recordkeeping of all borrowed items.  
 
 Only authorized users can create, update, or delete loan records.  
-
 This API ensures accountability and maintains a clear history of each device loan.
 
 ---
@@ -15,161 +14,280 @@ This function allows an authorized user to create a new loan record in the syste
 ```
 POST /api/loans
 ```
-**Request:**
-```javascript
+**Request Body:**
+```json
 {
-  "citizen_id": number,
-  "employee_id": number,
-  "device_id": number,
-  "status_id": number,
-  "start_at": "YYYY-MM-DD",
-  "due_at": "YYYY-MM-DD",
-  "loan_condition": number,
-  "loan_condition_notes": string,
-  "all_accessories_returned": boolean,
-  "missing_accessories": string,
+  "binId": integer,
+  "loanStatusId": integer,
+  "citizenId": integer,
+  "employeeId": integer,
+  "dueAt": timestamp(YYYY-MM-DD),
+  "loanConditionId": integer,
+  "loanConditionNotes": string,
   "notes": string
 }
 ```
-**Request Example:**
-```javascript
+**Required fields:**
+- binId
+- loanStatusId
+- citizenId
+- employeeId
+- dueAt
+- loanConditionId
+
+**Example Request:**
+```json
 {
-  "citizen_id": 101,
-  "employee_id": 3,
-  "device_id": 22,
-  "status_id": 1,
-  "start_at": "2025-09-14",
-  "due_at": "2025-09-21",
-  "loan_condition": 2,
-  "loan_condition_notes": "Minor scratch on front right side of device",
-  "all_accessories_returned": true,
-  "missing_accessories": null,
+  "binId": 5,
+  "loanStatusId": 1,
+  "citizenId": 1,
+  "employeeId": 3,
+  "dueAt": "2025-11-30",
+  "loanConditionId": 2,
+  "loanConditionNotes": "Minor scratch on front right side of device",
   "notes": "DL was verified before checkout"
 }
 ```
 **Response:**
-```javascript
-success: 201 created
+```json
+success: 201 Created
 {
-  "status": 201,
-  "message": "Loan created successfully"
+    "message": "Loan created successfully",
+    "data": {
+        // Loan data
+    }
 }
 ```
+**Error Responses:**
+```json
+400 Bad Request
+{
+  "error": "Missing required fields"
+}
+```
+```json
+400 Bad Request
+{
+  "error": "Invalid bin ID"
+}
+```
+```json
+500 Internal Server Error
+{
+  "error": "An unexpected error has occurred."
+}
+```
+
+---
+
 ## Get All Loans
 This function allows an authorized user to retrieve every loan record in the system.    
 ```
 GET /api/loans
 ```
-
 **Response:** 
-```javascript
-"success" 200 OK
+```json
+200 OK
 {
-  "status": 200,
-  "message": "Loans retrieved successfully"
+  "message": "Loans retrieved successfully",
+  "data": [
+    // List of Loans
+  ]
 }
 ```
+**Error:**
+```json
+500 Internal Server Error
+{
+  "error": "An unexpected error has occurred."
+}
+```
+
+---
 
 ## Get Loan by ID
 This function allows an authorized user to retrieve a specific loan record by its ID number.  
-**GET** /api/loans{loan_id}
-
+```
+GET /api/loans/{loan_id}
+```
 **Response:**
-```javascript
-success: 200 OK
+```json
+200 OK
 {
-  "status": 200,
-  "message": "Loan retrieved successfully"
+  "message": "Loan retrieved successfully",
+  "data": {
+    // Loan data
+  }
 }
 ```
+**Error:**
+```json
+404 Not Found
+{
+  "error": "Loan not found"
+}
+```
+```json
+500 Internal Server Error
+{
+  "error": "An unexpected error has occurred."
+}
+```
+
+---
+
 ## Replace Loan
 This function allows an authorized user to replace all details of an existing loan record.  
 ```
 PUT /api/loans/{loan_id}
 ```
-
-**Request:**
-```javascript
+**Request Body:**
+```json
 {
-  "citizen_id": number,
-  "employee_id": number,
-  "device_id": number,
-  "status_id": number,
-  "start_at": "YYYY-MM-DD",
-  "due_at": "YYYY-MM-DD",
-  "loan_condition": number,
-  "loan_condition_notes": string,
-  "return_condition": number,
-  "return_condition_notes": string,
-  "damage_fee": number,
-  "all_accessories_returned": boolean,
-  "missing_accessories": string,
+  "binId": integer,
+  "loanStatusId": integer,
+  "citizenId": integer,
+  "employeeId": integer,
+  "startAt": timestamp(YYYY-MM-DD),
+  "dueAt": timestamp(YYYY-MM-DD),
+  "returnedAt": timestamp(YYYY-MM-DD),
+  "loanConditionId": integer,
+  "loanConditionNotes": string,
+  "returnConditionId": integer,
+  "returnConditionNotes": string,
+  "damageFee": bigdecimal(0.00),
+  "allAccessoriesReturned": boolean,
+  "missingAccessories": string,
   "notes": string
 }
 ```
+**Required fields:**
+- binId
+- loanStatusId
+- citizenId
+- employeeId
+- startAt
+- dueAt
+- loanConditionId
 
-**Request Example:**
-```javascript
+**Example Request:**
+```json
 {
-  "citizen_id": 101,
-  "employee_id": 3,
-  "device_id": 22,
-  "status_id": 2,
-  "start_at": "2025-09-14",
-  "due_at": "2025-09-21",
-  "loan_condition": 3,
-  "loan_condition_notes": "Updated condition details",
-  "return_condition": null,
-  "return_condition_notes": null,
-  "damage_fee": null,
-  "all_accessories_returned": false,
-  "missing_accessories": "Charger missing",
-  "notes": "Updated loan information"
+  "binId": 5,
+  "loanStatusId": 1,
+  "citizenId": 1,
+  "employeeId": 3,
+  "startAt": "2025-11-25",
+  "dueAt": "2025-11-30",
+  "returnedAt": "2025-11-30",
+  "loanConditionId": 2,
+  "loanConditionNotes": "Minor scratch on front right side of device",
+  "returnConditionId": 2,
+  "returnConditionNotes": "Minor scratch on front right side of device",
+  "damageFee": 0.00,
+  "allAccessoriesReturned": true,
+  "missingAccessories": "none",
+  "notes": "Returned in same condition as checkout"
 }
 ```
 **Response:**
-```javascript
-success: 200 OK
+```json
+200 OK
 {
-  "status": 200,
-  "message": "Loan replaced successfully"
+  "message": "Loan replaced successfully",
+  "data": {
+    // // Loan data
+  }
 }
 ```
+**Error:**
+```json
+400 Bad Request
+{
+  "error": "Missing required fields"
+}
+```
+```json
+404 Not Found
+{
+  "error": "Loan not found"
+}
+```
+```json
+500 Internal Server Error
+{
+  "error": "An unexpected error has occurred."
+}
+```
+
+---
+
 ## Update Loan
-This function allows an authorized user to update or more fields of a loan record.  
+This function allows an authorized user to update one or more fields of a loan record. (Used to check in a returning loan)  
 ```
 PATCH /api/loans/{loan_id}
 ```
-**Request:**
-```javascript
+**Request Body:**
+```json
 {
-  "returned_at": "YYYY-MM-DD",
-  "return_condition": number,
-  "return_condition_notes": string,
-  "damage_fee": number,
-  "all_accessories_returned": boolean,
-  "missing_accessories": string,
+  "loanStatusId": integer,
+  "returnedAt": timestamp(YYYY-MM-DD),
+  "returnCondition": integer,
+  "returnConditionNotes": string,
+  "damageFee": bigdecimal(0.00),
+  "allAccessoriesReturned": boolean,
+  "missingAccessories": string,
   "notes": string
 }
 ```
-**Request Example:**
-```javascript
+**Required fields:**
+- loanStatusId
+- returnedAt
+- returnCondition
+- returnConditionNotes
+- damageFee
+- allAccessoriesReturned
+- missingAccessories
+- notes
+
+**Example Request:**
+```json
 {
-  "returned_at": "2025-09-20",
-  "return_condition": 1,
-  "return_condition_notes": "Returned in excellent condition",
-  "all_accessories_returned": true,
-  "notes": "Returned early with no signs of damage"
+  "loanStatusId": 2,
+  "returnedAt": "2025-11-30",
+  "returnCondition": 2,
+  "returnConditionNotes": "Minor scratch on front right side of device",
+  "damageFee": 0.00,
+  "allAccessoriesReturned": true,
+  "missingAccessories": "none",
+  "notes": "Returned in same condition as checkout"
 }
 ```
 **Response:**
-```javascript
-success: 200 OK
+```json
+200 OK
 {
-  "status": 200,
-  "message": "Loan updated successfully"
+  "message": "Loan updated successfully",
+  "data": {
+    // Loan data
+  }
 }
 ```
+**Error:**
+```json
+404 Not Found
+{
+  "error": "Loan not found"
+}
+```
+```json
+500 Internal Server Error
+{
+  "error": "An unexpected error has occurred."
+}
+```
+
+---
 
 ## Delete Loan
 This function allows an authorized user to delete a loan record from the system.
@@ -177,11 +295,24 @@ This function allows an authorized user to delete a loan record from the system.
 DELETE /api/loans/{loan_id}
 ```
 **Response**
-```javascript
-success: 204 No Content
+```json
+200 OK
 {
-  "status": 204,
   "message": "Loan deleted successfully"
+  "data": null
+}
+```
+**Error:**
+```json
+404 Not Found
+{
+  "error": "Loan not found"
+}
+```
+```json
+500 Internal Server Error
+{
+  "error": "An unexpected error has occurred."
 }
 ```
 

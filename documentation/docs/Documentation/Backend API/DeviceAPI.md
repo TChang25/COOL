@@ -4,7 +4,7 @@ The device CRUD is made for the purpose of managing devices in the overall syste
 
 ### Background Information
 
-The device objects have three parts to them, an ID, a status, and a type. The ID is there so that the system can differentiate between each device, it is the only unique part of each device. Conversely status is used to determine whether the device can be loaded out, isn’t able to be loaned out, or already loaned out. And type is used to describe what the device is, but unlike ID can be the same as any other device and is not used outside of information. Users will not directly be able to affect any of these, with ID and type being locked behind the system not for them to touch, the only one they will be able to affect indirectly is status, being able to change the status of them by withdrawing or returning.
+The device objects have three parts to them, an ID, a status, and a type. The ID is there so that the system can differentiate between each device, it is the only unique part of each device. Conversely status is used to determine whether the device can be loaned out, isn’t able to be loaned out, or already loaned out. And type is used to describe what the device is, but unlike ID can be the same as any other device and is not used outside of information. Users will not directly be able to affect any of these, with ID and type being locked behind the system not for them to touch, the only one they will be able to affect indirectly is status, being able to change the status of them by withdrawing or returning.
 
 The main interactions will be done through a GUI, it will feature all devices in the device database, detailing their ID, status, and type. The actions users can take change depending on the status of the device.
 
@@ -12,193 +12,309 @@ If the status is available there will be a button that allows them to take out a
 
 Additionally full CRUD functionality has been programmed, allowing for more direct modifications of the status and type if needed.
 
-### Read Devices
+---
 
+## Read Devices
 This function returns all devices in the database.
-
 ```
-GET /api/my-devices/device
+GET /api/devices
 ```
-
-**Response**
-
-Status: 200 OK
-
-```javascript
+**Response:**
+```json
+200 OK
 [
-
   {
-  
     "deviceId": 0,
-    "status": "active",
-    "type": "basic"
-  
-  },
-  
-  {
-  
-    "deviceId": 2,
-    "status": null,
-    "type": null
-  
-  },
-  
-  {
-  
-    "deviceId": 52,
-    "status": "Update",
-    "type": "Testing"
-  
-  },
-  
-  {
-  
-    "deviceId": 102,
-    "status": null,
-    "type": null
-  
-  },
-  
-  {
-  
-    "deviceId": 202,
-    "status": "test2",
-    "type": "type2"
-  
+    "deviceName": "string",
+    "serialNumber": "string",
+    "status": {
+      "deviceStatusId": 1,
+      "statusName": "active"
+    },
+    "type": {
+      "deviceTypeId": 1,
+      "typeName": "basic"
+    },
+    "location": {
+      "locationId": 1,
+      "locationName": "Main Office"
+    },
+    "createdBy": {
+      "userId": 1,
+      "email": "admin@example.com"
+    }
   }
-
+  // ... more devices
 ]
 ```
-
-Status: 500 Internal Server Error
-
-```javascript
+**Error Response:**
+```json
+500 Internal Server Error
 {
   "error": "Internal Server Error"
 }
 ```
 
-### Create Device
+---
 
-Adds a device to the database
-
+## Read Device by ID
+Returns a single device by its ID.
 ```
-POST /api/my-devices/device
+GET /api/devices/{id}
 ```
-
-**Request**
-
-```javascript
+**Response:**
+```json
+200 OK
 {
-
-  "deviceId": number,
-  "status": string,
-  "type": string
-
+  "deviceId": 0,
+  "deviceName": "string",
+  "serialNumber": "string",
+  "status": {
+    "deviceStatusId": 1,
+    "statusName": "active"
+  },
+  "type": {
+    "deviceTypeId": 1,
+    "typeName": "basic"
+  },
+  "location": {
+    "locationId": 1,
+    "locationName": "Main Office"
+  },
+  "createdBy": {
+    "userId": 1,
+    "email": "admin@example.com"
+  }
+}
+```
+**Error Response:**
+```json
+404 Not Found
+{
+  "error": "Device not found with ID {id}"
 }
 ```
 
-```javascript
-{
+---
 
+## Create Device
+Adds a device to the database.
+```
+POST /api/devices
+```
+**Request Body:**
+```json
+{
+  "deviceName": string,
+  "serialNumber": string,
+  "status": {
+    "deviceStatusId": integer
+  },
+  "type": {
+    "deviceTypeId": integer
+  },
+  "location": {
+    "locationId": integer
+  },
+  "createdBy": {
+    "userId": integer
+  }
+}
+```
+**Required fields:**
+- deviceName
+- serialNumber
+- status.deviceStatusId
+- type.deviceTypeId
+- location.locationId
+- createdBy.userId
+
+**Example Request:**
+```json
+{
+  "deviceName": "Laptop 1",
+  "serialNumber": "SN123456",
+  "status": {
+    "deviceStatusId": 2
+  },
+  "type": {
+    "deviceTypeId": 3
+  },
+  "location": {
+    "locationId": 1
+  },
+  "createdBy": {
+    "userId": 1
+  }
+}
+```
+**Response:**
+```json
+201 Created
+{
   "deviceId": 252,
-  "status": "Lent",
-  "type": "Laptop"
-
+  "deviceName": "Laptop 1",
+  "serialNumber": "SN123456",
+  "status": {
+    "deviceStatusId": 2,
+    "statusName": "Lent"
+  },
+  "type": {
+    "deviceTypeId": 3,
+    "typeName": "Laptop"
+  },
+  "location": {
+    "locationId": 1,
+    "locationName": "Main Office"
+  },
+  "createdBy": {
+    "userId": 1,
+    "email": "admin@example.com"
+  }
+}
+```
+**Error Responses:**
+```json
+400 Bad Request
+{
+  "error": "Invalid DeviceType ID"
+}
+```
+```json
+400 Bad Request
+{
+  "error": "Invalid DeviceStatus ID"
+}
+```
+```json
+400 Bad Request
+{
+  "error": "Invalid Location ID"
+}
+```
+```json
+400 Bad Request
+{
+  "error": "Invalid User ID"
 }
 ```
 
-**Response**
+---
 
-Status: 200 OK
-
-```javascript
+## Update Device
+Allows an authorized user to change a device’s type, status, name, serial number, location, or creator.
+```
+PUT /api/devices/{id}
+```
+**Request Body:**
+```json
 {
-
-  "deviceId": 252,
-  "status": "Lent",
-  "type": "Laptop"
-
+  "deviceName": string,
+  "serialNumber": string,
+  "status": {
+    "deviceStatusId": integer
+  },
+  "type": {
+    "deviceTypeId": integer
+  },
+  "location": {
+    "locationId": integer
+  },
+  "createdBy": {
+    "userId": integer
+  }
 }
 ```
-
-Status: 400 Bad Request
-
-```javascript
+**Example Request:**
+```json
 {
-  "error": "Bad Request"
+  "deviceName": "Phone 1",
+  "serialNumber": "SN654321",
+  "status": {
+    "deviceStatusId": 1
+  },
+  "type": {
+    "deviceTypeId": 2
+  },
+  "location": {
+    "locationId": 1
+  },
+  "createdBy": {
+    "userId": 1
+  }
 }
 ```
-
-### Update Device
-
-Allows the user to change a device’s type and status.
-
-```
-PUT /api/my-devices/device/{deviceId}
-```
-
-**Request**
-```javascript
+**Response:**
+```json
+200 OK
 {
-
-  "deviceId": number,
-  "status": string,
-  "type": string
-
-}
-```
-
-```javascript
-{
-
   "deviceId": 2,
-  "status": "Ready",
-  "type": "Phone"
-
+  "deviceName": "Phone 1",
+  "serialNumber": "SN654321",
+  "status": {
+    "deviceStatusId": 1,
+    "statusName": "Ready"
+  },
+  "type": {
+    "deviceTypeId": 2,
+    "typeName": "Phone"
+  },
+  "location": {
+    "locationId": 1,
+    "locationName": "Main Office"
+  },
+  "createdBy": {
+    "userId": 1,
+    "email": "admin@example.com"
+  }
+}
+```
+**Error Responses:**
+```json
+400 Bad Request
+{
+  "error": "Invalid DeviceType ID"
+}
+```
+```json
+400 Bad Request
+{
+  "error": "Invalid DeviceStatus ID"
+}
+```
+```json
+400 Bad Request
+{
+  "error": "Invalid Location ID"
+}
+```
+```json
+400 Bad Request
+{
+  "error": "Invalid User ID"
+}
+```
+```json
+404 Not Found
+{
+  "error": "Device not found with ID {id}"
 }
 ```
 
-**Response**
+---
 
-Status: 200 OK
+## Delete Device
+Allows an authorized user to delete a device from the database.
+```
+DELETE /api/devices/{id}
+```
+**Response:**
+- Status: 204 No Content (on success, no content returned)
 
-```javascript
+**Error Response:**
+```json
+404 Not Found
 {
-
-  "deviceId": 2,
-  "status": "Ready",
-  "type": "Phone"
-
-}
-```
-
-Status: 400 Bad Request
-
-```javascript
-{
-  "error": "Bad Request"
-}
-```
-
-### Delete Device
-
-Allows for the deletion of a device from the database.
-
-```
-DELETE /api/my-devices/device/{deviceId}
-```
-
-**Response**
-
-Status: 200 OK
-
-Deleted Successfully
-
-Status: 404 Not Found
-
-```javascript
-{
-  "error": "Not Found"
+  "error": "Device not found with ID {id}"
 }
 ```

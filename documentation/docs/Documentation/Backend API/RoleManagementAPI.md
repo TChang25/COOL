@@ -1,158 +1,213 @@
-#  Role Management API 
-When a new user registers for an account, their role_name is automatically set to "employee." 
+# Role Management API
 
-Only users with the admin role have permission to change another user's role_name using the user's role_id number. 
-- role_id
-- role_name 
+When a new user registers for an account, their `roleName` is automatically set to "employee."
+
+Only users with the admin role have permission to change another user's role using the user's role ID.
+
+---
+
+## List All Roles
+This function allows the admin to retrieve every role available in the system.
+```
+GET /api/user-roles
+```
+**Response:**
+```json
+200 OK
+[
+  {
+    "roleId": 1,
+    "roleName": "Admin",
+    "dlRequired": false,
+    "active": true
+  },
+  {
+    "roleId": 2,
+    "roleName": "Employee",
+    "dlRequired": false,
+    "active": true
+  },
+  // more roles...
+]
+```
+**Error Responses:**
+```json
+403 Forbidden
+{
+  "error": "Access denied. You do not have permission to view roles."
+}
+```
+```json
+500 Internal Server Error
+{
+  "error": "An unexpected error has occurred."
+}
+```
 
 ---
 
-### List All Roles 
-This function allows the admin to retrieve every role available in the system. 
-<br>
-
-        GET /api/user_role
+## Get Role by ID
+This function allows the admin to retrieve a specific role by its ID.
 ```
-    Response:
-    success: 200 OK
-        {
-            status: 200,
-            message: "User roles retrieved successfully"
-            user_role: [
-                {
-                    role_id: int,
-                    role_name: string
-                },
-                {
-                    role_id: int,
-                    role_name: string
-                }
-                {
-                    role_id: int,
-                    role_name: string
-                }
-
-            ]
-        }
-
-    error: 403 Forbidden
-    {
-        error: "Access denied. You do not have permission to view roles."
-    }    
-
-    error: 500 Internal Server Error
-    {
-        error: "An unexpected error has occurred."
-    }
+GET /api/user-roles/{id}
 ```
----
-### Update User Role
-This function allows an admin to update the role properties in the system.
-<br>
-
-     PATCH /api/user_role
-
+**Response:**
+```json
+200 OK
+{
+  "roleId": 1,
+  "roleName": "Admin",
+  "dlRequired": false,
+  "active": true
+}
 ```
-    Request:
-    {
-        role_id: int,
-        role_name: string
-    }
-```
-```
-    Response:
-        success: 200 OK
-        {
-            role_id: int,
-            role_name: string,
-        }    
-
-        error: 403 Forbidden
-        {
-            error: "Unauthorized to update role."
-        }
-
-        error: 404 Not Found
-        {
-            error: "User not found"
-        }
-
-```
----
-### Create Role Funtionality
-This function lets the admin add a new role to the system. 
-
-    POST /api/user_role
-
-
-```
-    Request:
-    {
-        role_name: string
-        dl_required: boolean
-    }
-```
-```
-    Response: 
-        success: 201 Created
-        {
-            role_id: int
-            role_name: string
-            dl_required: boolean
-        }
-    
-        error: 400 Bad Request
-        {
-            error:"Invaild data provided."
-        }
-    
-        error: 403 Forbidden
-        {     
-            error: "Unauthorized to create role."
-        }
-
-        error: 409 Conflit
-        {
-            error: "Role already exists."
-        }
-
-
+**Error Response:**
+```json
+404 Not Found
+{
+  "error": "Role not found with ID {id}"
+}
 ```
 
 ---
-### Delete Role Funtionality 
-This function allows the admin to delete roles in the system. 
 
-<u>**NOTE**: Core Roles ("Admin", and "Employee") cannot be deleted.</u>
+## Create Role
+This function lets the admin add a new role to the system.
+```
+POST /api/user-roles
+```
+**Request Body:**
+```json
+{
+  "roleName": string,
+  "dlRequired": boolean,
+  "active": boolean
+}
+```
+**Required fields:**
+- roleName
+- dlRequired
+- active
 
-        DELETE /api/user_role
+**Example Request:**
+```json
+{
+  "roleName": "NewRole",
+  "dlRequired": false,
+  "active": true
+}
+```
+**Response:**
+```json
+201 Created
+{
+  "roleId": 4,
+  "roleName": "NewRole",
+  "dlRequired": false,
+  "active": true
+}
+```
+**Error Responses:**
+```json
+400 Bad Request
+{
+  "error": "Role name cannot be empty"
+}
+```
+```json
+403 Forbidden
+{
+  "error": "Unauthorized to create role."
+}
+```
+```json
+409 Conflict
+{
+  "error": "Role already exists."
+}
+```
+
+---
+
+## Update Role
+This function allows an admin to update the properties of a role in the system.
+```
+PUT /api/user-roles/{id}
+```
+**Request Body:**
+```json
+{
+  "roleName": string,
+  "dlRequired": boolean,
+  "active": boolean
+}
+```
+**Required fields:**
+- roleName
+- dlRequired
+- active
+
+**Example Request:**
+```json
+{
+  "roleName": "UpdateRole",
+  "dlRequired": false,
+  "active": true
+}
+```
+**Response:**
+```json
+200 OK
+{
+  "roleId": 4,
+  "roleName": "UpdateRole",
+  "dlRequired": false,
+  "active": true
+}
+```
+**Error Responses:**
+```json
+403 Forbidden
+{
+  "error": "Unauthorized to update role."
+}
+```
+```json
+404 Not Found
+{
+  "error": "Role not found with ID {id}"
+}
+```
+
+---
+
+## Delete Role
+This function allows the admin to delete roles in the system.
+
+> **NOTE:** Core roles ("Admin" and "Employee") cannot be deleted.
 
 ```
-    Request:
-    {
-        role_name: string
-    }
+DELETE /api/user-roles/{id}
 ```
+**Response:**
+- Status: 204 No Content (on success, no content returned)
+
+**Error Responses:**
+```json
+403 Forbidden
+{
+  "error": "Unauthorized to delete role."
+}
 ```
-    Response: 
-    success: 200 OK
-    {
-        status:200
-        message: "Role deleted successfuly"
-    }
-
-    error: 403 Forbidden 
-    {
-        error: "Unauthorized to delete role."
-    }
-
-    error: 404 Not Found
-    {
-        error: Role not found." 
-    }
-
-    error: 409 Conflict
-    {
-        error: "Core roles cannot be deleted."
-    }
+```json
+404 Not Found
+{
+  "error": "Role not found with ID {id}"
+}
+```
+```json
+409 Conflict
+{
+  "error": "Core roles cannot be deleted."
+}
 ```
