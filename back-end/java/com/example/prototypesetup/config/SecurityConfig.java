@@ -2,6 +2,7 @@ package com.example.prototypesetup.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -40,7 +41,14 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/loans/**").hasAuthority("SCOPE_Admin")
+                        .requestMatchers("/api/user-roles/**").hasAuthority("SCOPE_Admin")
+                        .requestMatchers("/api/app-users/**").hasAuthority("SCOPE_Admin")
+                        .requestMatchers(HttpMethod.POST, "/api/locations/**").hasAuthority("SCOPE_Admin")
+                        .requestMatchers(HttpMethod.PUT, "/api/locations/**").hasAuthority("SCOPE_Admin")
+                        .requestMatchers(HttpMethod.DELETE, "/api/locations/**").hasAuthority("SCOPE_Admin")
+                        .requestMatchers(HttpMethod.POST, "/api/devices/**").hasAuthority("SCOPE_Admin")
+                        .requestMatchers(HttpMethod.PUT, "/api/devices/**").hasAuthority("SCOPE_Admin")
+                        .requestMatchers(HttpMethod.DELETE, "/api/devices/**").hasAuthority("SCOPE_Admin")
                         .anyRequest().hasAnyAuthority("SCOPE_Admin", "SCOPE_Employee")
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
