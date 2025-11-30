@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import DeviceInventory from "../components/DeviceInventory";
 import EmployeeManagement from "../components/EmployeeManagement";
 import UsageStatistics from "../components/UsageStatistics";
+import LoanTable from "../components/LoanTable";
 
 const AdminDashboardPage = () => {
   const navigate = useNavigate();
@@ -48,7 +49,8 @@ const AdminDashboardPage = () => {
       </Typography>
 
       {/* 🔹 Dashboard Components */}
-      <Box >
+      <Box>
+        <LoanTable />
         <DeviceInventory />
         <UsageStatistics />
         <EmployeeManagement />
