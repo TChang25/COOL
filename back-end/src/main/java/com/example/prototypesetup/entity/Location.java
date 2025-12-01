@@ -28,7 +28,7 @@ public class Location {
     @Column(name = "location_name", nullable = false, length = 150)
     private String locationName;
 
-    @Column(name = "street_address", length = 255)
+    @Column(name = "address", length = 255)
     private String streetAddress;
 
     @Column(name = "city", length = 100)

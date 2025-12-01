@@ -9,6 +9,7 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @IdClass(UserLocationAccessId.class)
 @Table(name = "user_location_access")
 public class UserLocationAccess implements Serializable {
@@ -16,10 +17,12 @@ public class UserLocationAccess implements Serializable {
     @Id
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "app_user_id", nullable = false)
+    @EqualsAndHashCode.Include
     private AppUser appUser;
 
     @Id
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "location_id", nullable = false)
+    @EqualsAndHashCode.Include
     private Location location;
 }
