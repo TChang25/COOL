@@ -8,12 +8,17 @@ This guide will walk you through setting up the COOL (City of Orlando Loaners) s
 
 Before you begin, ensure you have the following installed:
 
+**Required**
 - **[Docker Desktop](https://www.docker.com/products/docker-desktop/)** (for running the MySQL database container)
 - **[Java 17+ JDK](https://adoptopenjdk.net/)**
 - **[Maven](https://maven.apache.org/download.cgi)**
 - **[Git](https://git-scm.com/downloads)** (to clone the repository)
-- **[Visual Studio Code](https://code.visualstudio.com/)** or another code editor (optional, for code review)
-- **[Postman](https://www.postman.com/downloads/)** (optional, for API testing)
+- **[Node.js & npm](https://nodejs.org/)** (for running the front-end)
+- **[Visual Studio Code](https://code.visualstudio.com/)** or another code editor (for code review)
+
+**Optional**
+- **[Postman](https://www.postman.com/downloads/)** (for API testing)
+- **[OpenSSL](https://www.openssl.org/)** (for generating RSA keys; or use the Docker method)
 
 ---
 
@@ -31,23 +36,9 @@ git clone https://github.com/CityOfOrlando-2025/COOL.git
 
 The project uses MySQL, which is run in a Docker container.
 
-### 2.1. Project Structure
+### 2.1. Create Your `.env` File
 
-Ensure your project root contains:
-
-```
-project-root/database
-├── docker-compose.yaml
-├── .env.sample
-├── .gitignore
-└── initdb/
-    ├── cool-ddl.sql
-    └── seed-dev.sql
-```
-
-### 2.2. Create Your `.env` File
-
-Copy the sample environment file and edit it with your own secure passwords.
+Copy the sample environment file `.env.sample` into a new file named `.env`.
 
 Edit `.env` and set your own values for `MYSQL_USER`, `MYSQL_PASSWORD`, and `MYSQL_ROOT_PASSWORD`:
 
@@ -58,11 +49,11 @@ MYSQL_PASSWORD=devPassword123
 MYSQL_DATABASE=cool_db
 ```
 
-### 2.3. Launch the MySQL Container with Docker Compose
+### 2.2. Launch the MySQL Container with Docker Compose
 
 Make sure Docker Desktop is running before proceeding.
 
-From `project-root/database`, open a terminal and run:
+Open a terminal from the `/database` directory and use the following command:
 
 ```bash
 docker compose up -d
@@ -70,11 +61,60 @@ docker compose up -d
 
 This will:
 - Build and start a MySQL container named `cool-mysql`
-- Initialize the database schema and seed data if this is the first run
+- Initialize the database schema and seed data.
 
-### 2.4. Configure Application Properties
+---
 
-Open `back-end/resources/application.properties` and ensure the database connection matches your Docker setup:
+## 3. Generate and Configure RSA Keys
+
+The backend uses RSA key pairs for secure JWT authentication.
+**You must generate these keys before building the backend.**
+
+The Docker Compose method is recommended for key generation, as it does not require OpenSSL to be installed locally.
+
+`private.pem` and `public.pem` must be present in the `back-end/src/main/resources/certs/` directory.
+These files are referenced by the backend for signing and verifying tokens.
+
+### Option 1 (Recommended): Generate Keys Using Docker Compose
+
+Open a terminal from the `/database` directory and use the following command:
+
+```bash
+docker compose --profile openssl run --rm rsakeys
+```
+
+This will:
+- Generate `private.pem` and `public.pem` in `back-end/src/main/resources/certs/` if they do not already exist.
+- You will see a message confirming key generation or that the keys already exist.
+
+### Option 2: Generate Keys Using OpenSSL Locally
+
+To generate the keys manually with OpenSSL, open a terminal from the `back-end/src/main/resources/certs/` directory and use the following commands:
+
+```bash
+# Navigate terminal to the certs directory
+cd back-end/src/main/resources/certs
+
+# Generate a 2048-bit private key in PKCS#1 format
+openssl genrsa -out keypair.pem 2048
+
+# Generate a corresponding public key
+openssl rsa -in keypair.pem -pubout -out public.pem
+
+# Convert the private key to PKCS#8 format
+openssl pkcs8 -topk8 -inform PEM -outform PEM -nocrypt -in keypair.pem -out private.pem
+
+# Remove the file keypair.pem  (or just delete it manually)
+rm keypair.pem
+```
+
+---
+
+## 4. Configure Application Properties
+
+Open `/back-end/resources/application.properties` and ensure the database connection matches your Docker setup.
+
+Make sure the username and password match your `.env` file:
 
 ```
 spring.datasource.url=jdbc:mysql://localhost:3307/cool_db
@@ -83,154 +123,96 @@ spring.datasource.password=devPassword123
 spring.jpa.hibernate.ddl-auto=update
 ```
 
-- Make sure the username and password match your `.env` file.
-
 ---
 
-## 3. Build and Run the Application
+## 5. Build and Run the Backend Spring Boot Application
 
-### 3.1. Build with Maven
-
-From `project-root/back-end`, open a terminal and run:
+Open a terminal from the `/back-end` directory and run:
 
 ```bash
 mvn clean install
 ```
-
-### 3.2. Start the Spring Boot Application
-
+Then run:
 ```bash
 mvn spring-boot:run
 ```
 
-- The server will start on port 8080 by default.
-- You should see logs indicating that the application is available and accepting traffic.
-
-### 3.3. Verify the Application
-
-Open your browser and go to:
-
-```
-http://localhost:8080/
-```
-
-You should see a welcome message.
+The back-end will run on http://localhost:8080/ by default.
 
 ---
 
-## 4. Initialize the Database (If Needed)
+## 6. Build and Run the Front-End VITE Application
 
-If your database is empty, you may need to create initial roles, users, or locations. You can do this using Postman or another API client.
+Open a terminal from the `/database` directory and run:
 
-### 4.1. Create Roles
-
-Send a `POST` request to `/api/user-roles` with a body like:
-
-```json
-{
-  "roleName": "Admin",
-  "dlRequired": false,
-  "active": true
-}
+```bash
+npm install
+```
+Then run:
+```bash
+npm run dev
 ```
 
-Repeat for "Employee" and any other roles you need.
-
-### 4.2. Create Locations
-
-Send a `POST` request to `/api/locations`:
-
-```json
-{
-  "locationName": "Downtown Recreation Center",
-  "streetAddress": "500 S Orange Ave",
-  "city": "Orlando",
-  "state": "FL",
-  "zipCode": "32801",
-  "contactNumber": "407-555-1234"
-}
-```
-
-### 4.3. Create Users
-
-Send a `POST` request to `/api/app-users`:
-
-```json
-{
-  "fullName": "Jane Doe",
-  "email": "jane.doe@example.com",
-  "password": "securepassword",
-  "role": { "roleId": 1 },
-  "locationAccess": [
-    { "location": { "locationId": 1 } }
-  ]
-}
-```
+The front-end will run on http://localhost:3307/ by default.
 
 ---
 
-## 5. Making Loans
+## 7. Initialize the Database
 
-Once you have users, roles, and locations set up, you can start making loans.
+The database should be populated with seed data on its creation.
+You may adjust its data as needed to create more roles, users, devices, bins, and locations. 
 
-### 5.1. Create a Loan
+Most of this data should be created using the front-end service. However, if needed you can do this using Postman or another API client.
+Refer to API documentation under `/Backend API/` for more information on using API endpoints.
 
-Send a `POST` request to `/api/loans`:
-
-```json
-{
-  "binId": 5,
-  "loanStatusId": 1,
-  "citizenId": 1,
-  "employeeId": 3,
-  "dueAt": "2025-11-30",
-  "loanConditionId": 2,
-  "loanConditionNotes": "Minor scratch on front right side of device",
-  "notes": "DL was verified before checkout"
-}
+A user `devAdmin` is included in the seed data, as an authenticated user is required to perform API requests; some requests, such as creating users, require an admin role. 
+```
+email: dev@workemail.com
+password: devPassword123
 ```
 
----
-
-## 6. API Testing and Usage
-
-- Use [Postman](https://www.postman.com/downloads/) to test all endpoints.
-- Refer to the API documentation in the `documentation/docs/Documentation/Backend API/` folder for details on request/response formats for each endpoint.
+It's recomended that you use the Dev Admin included in the seed data to create real users then delete the users created from the seed file.
 
 ---
 
-## 7. Stopping and Restarting the Application
+## 8. Stopping and Restarting the Application
 
 To stop the Spring Boot server, press `Ctrl+C` in the terminal where it is running.
 
-To stop the MySQL Docker container:
+To start the server open a terminal from the `/back-end` directory and run: 
+```bash
+mvn spring-boot:run
+```
 
+To stop the VITE application, press `Ctrl+C` in the terminal where it is running.
+
+To start the application open a terminal from the `/database` directory and run: 
+```bash
+npm run dev
+```
+
+<br>
+
+To stop the MySQL Docker container:
 ```bash
 docker compose stop
 ```
 
-To restart the container:
-
+To start the container:
 ```bash
 docker compose start
-```
-
-To remove the container and all data (reset):
-
-```bash
-docker compose down -v
-docker compose up -d
 ```
 
 ---
 
 ## 9. Additional Notes
 
-- For advanced configuration, see the `application.properties` file.
+- Never commit your private key (`private.pem`) to version control. Keep it secure.
+- The backend will automatically generate and validate JWT tokens using your RSA keys.
+
+- For advanced configuration, see the `application.properties` file (backend) or config files (front-end).
 - For more details on each API, see the markdown files in `documentation/docs/Documentation/Backend API/`.
-- Always keep your dependencies up to date and follow security best practices.
-- To reset your database and seed data, use `docker compose down -v` and `docker compose up -d`.
 
 ---
 
-You are now ready to use the COOL system!
+#### You are now ready to use the COOL system!
