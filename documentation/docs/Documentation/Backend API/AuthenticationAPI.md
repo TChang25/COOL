@@ -1,6 +1,5 @@
 # Authentication API
-
-Enables users to log in and out of the system.
+Enables users to log in and out of the system. 
 
 ---
 

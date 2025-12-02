@@ -170,11 +170,18 @@ CREATE TABLE bin (
     asset_tag VARCHAR(50) NOT NULL UNIQUE, -- unique identifier for the bin used for inventory tracking (bin # already in use by county)
     bin_contents VARCHAR(255), -- description of what is stored in the bin (e.g. "Laptop + hotspot", "Tablet", etc.)
     created_by_user_id BIGINT NOT NULL, -- a bin must have a creator (employee)
+
+    device_id BIGINT, -- can be NULL if bin is empty
     location_id INT NOT NULL, -- a bin must be associated with a location
 
     -- Auto-updates timestamp whenever the row is modified (on update CURRENT_TIMESTAMP)
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_bin_device
+        FOREIGN KEY (device_id) REFERENCES device(device_id)
+        ON DELETE SET NULL -- if a device is deleted, set device_id to NULL (to allow reusing the bin)
+        ON UPDATE CASCADE, -- if a device_id changes, all linked bins are updated automatically to stay in sync (to avoid orphaned bins)
 
     CONSTRAINT fk_bin_location
         FOREIGN KEY (location_id) REFERENCES location(location_id)
