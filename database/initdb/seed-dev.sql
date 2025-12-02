@@ -111,8 +111,8 @@ INSERT INTO app_user (full_name, email, password_hash, user_role_id)
 VALUES 
     ('Dev Admin', 'dev@workemail.com', 'hashed_pw_here', 1), -- Dev Admin role (1)
     ('Mgr Admin', 'admin@workemail.com', 'hashed_pw_here', 1), -- Mgr Admin role (1)
-    ('Test Employee', 'emp1@workemail.com', 'hashed_pw_here', 2), -- Employee role (2)
-    ('Second Employee', 'emp2@workemail.com', 'hashed_pw_here', 2); -- Employee role (2)
+    ('Employee One', 'emp1@workemail.com', 'hashed_pw_here', 2), -- Employee role (2)
+    ('Employee Two', 'emp2@workemail.com', 'hashed_pw_here', 2); -- Employee role (2)
 
 -- Citizen user (borrowers with full contact info)
 INSERT INTO app_user (full_name, email, password_hash, user_role_id, dl_num, dl_state, address, city, state, zip_code, date_of_birth, contact_number)
@@ -160,7 +160,9 @@ VALUES
 ('BIN-0002', 'Tablet + Hotspot', 2, 2),
 ('BIN-0003', 'Laptop', 2, 3),
 ('BIN-0004', 'Tablet', 1, 5),
-('BIN-0005', 'Hotspot', 1, 4);
+('BIN-0005', 'Hotspot', 1, 4),
+('BIN-0006', 'Laptop', 2, 2);
+
 
 -- ------------------------------------------------
 -- 2.4 Devices
@@ -174,7 +176,7 @@ VALUES
 ('Lenovo Tablet Series B', 1, 'TAB-002', 1, 1, 3),  -- Available Tablet
 ('Dell Laptop Series B',    2, 'LAP-002', 3, 3, 3),  -- Maintenance Laptop
 ('Verizon Hotspot Series A', 3, 'HOT-001', 1, 1, 4),  -- Available Hotspot
-('Dell Laptop Series C',      2, 'LAP-003', 2, 2, 4),  -- Loaned Laptop
+('Dell Laptop Series C',      2, 'LAP-003', 5, 2, 4),  -- Lost Laptop
 ('Samsung Tablet Series C',   1, 'TAB-003', 4, 2, 3),  -- Retired Tablet
 ('Verizon Hotspot Series B', 3,'HOT-002', 1, 2, 3);  -- Available Hotspot
 
@@ -184,14 +186,134 @@ VALUES
 -- NOTE: After testing MVP 1, change to subquery dynamically linked devices to bins 
 INSERT INTO bin_device (bin_id, device_id) 
 VALUES
-(1, 1),  -- BIN-0001 holds Lenovo Tablet Series A
-(1, 2),  -- BIN-0001 holds Dell Laptop Series A
-(2, 3),  -- BIN-0002 holds Lenovo Tablet Series B
-(2, 8),  -- BIN-0002 holds Verizon Hotspot Series B
-(3, 4),  -- BIN-0003 holds Dell Laptop Series B (Maintenance)
-(4, 7),  -- BIN-0004 holds Samsung Tablet Series C (Retired)
-(5, 5);  -- BIN-0005 holds Verizon Hotspot Series A
+(1, 1), -- BIN-0001 holds Lenovo Tablet Series A
+(1, 2), -- BIN-0001 holds Dell Laptop Series A
+(2, 3), -- BIN-0002 holds Lenovo Tablet Series B
+(2, 8), -- BIN-0002 holds Verizon Hotspot Series B
+(3, 4), -- BIN-0003 holds Dell Laptop Series B (Maintenance)
+(4, 7), -- BIN-0004 holds Samsung Tablet Series C (Retired)
+(5, 5), -- BIN-0005 holds Verizon Hotspot Series A
+(6, 6); -- BIN-0006 holds Dell Laptop Series C (Lost)
 
+
+-- -------------------------------------------------
+-- 2.6 Sample Loans
+-- -------------------------------------------------
+
+INSERT INTO loan (
+    bin_id, loan_status_id, citizen_id, employee_id, 
+    start_at, due_at, returned_at, loan_condition_id, loan_condition_notes, 
+    return_condition_id, return_condition_notes, damage_fee, all_accessories_returned, 
+    missing_accessories, notes
+)
+VALUES
+-- (1) Open Loan - Citizen Alex Martinez borrowing BIN-0001 via Employee One
+(
+    1, -- bin_id BIN-0001 (Laptop + Hotspot)
+    1, -- loan_status_id Open
+    5, -- citizen_id Alex Martinez
+    3, -- employee_id Employee One
+    NOW() - INTERVAL 1 DAY, -- loaned yesterday
+    NOW() + INTERVAL 1 DAY + INTERVAL 14 DAY, -- due 14 days after start (13 days from today)
+    NULL, -- not yet returned
+    1, 'Excellent at checkout', -- loan condition id and notes
+    NULL, NULL, -- no return condition yet
+    0.00, TRUE, NULL, -- no fees, all accessories returned
+    'Citizen Alex Martinez borrowed BIN-0001 with the help of Employee One. The loan is active and due in 14 days.'
+),
+
+
+-- (2) OPEN — Jamie Nguyen BIN-0002 via Employee One
+(
+    2,  -- bin_id  BIN-0002 (Tablet + Hotspot)
+    1,  -- loan_status_id Open
+    6,  -- citizen_id Jamie Nguyen
+    3,  -- employee_id Employee One
+    NOW() - INTERVAL 3 DAY, -- loan started 3 days ago
+    NOW() - INTERVAL 3 DAY + INTERVAL 14 DAY, -- due in 11 days
+    NULL, -- not yet returned
+    2,  'Good at checkout', -- loan condition id and notes
+    NULL, NULL, -- no return condition yet
+    0.00, TRUE, NULL, -- not yet returned
+    'Citizen Jamie Nguyen checked out BIN-0002 with Employee One. The loan is currently open and due soon.'
+),
+
+-- (3) RETURNED — Taylor Johnson BIN-0003 via Employee Two
+(
+    3,  -- bin_id BIN-0003 (Laptop)
+    2,  -- loan_status_id Returned
+    7,  -- citizen_id Taylor Johnson
+    4,  -- employee_id Employee Two
+    NOW() - INTERVAL 20 DAY, -- loan started 20 days ago 
+    NOW() - INTERVAL 6 DAY, -- due 14 days after start (6 days ago)
+    NOW() - INTERVAL 5 DAY, -- returned 1 day after due date
+    3,  'Fair at checkout', -- loan condition id and notes
+    2,  'Good upon return', -- return condition id and notes
+    0.00, TRUE, NULL, -- no fees, all accessories returned
+    'Citizen Taylor Johnson returned BIN-0003 in good condition after a 14-day loan. Processed by Employee Two.'
+),
+
+-- (4) RETURNED — Casey Rivera BIN-0004 via Employee One
+(
+    4,  -- bin_id BIN-0004 (Tablet)
+    2,  -- loan_status_id Returned
+    8,  -- citizen_id Casey Rivera
+    3,  -- employee_id Employee One
+    NOW() - INTERVAL 10 DAY, -- loan started 10 days ago
+    NOW() - INTERVAL 10 DAY + INTERVAL 14 DAY, -- due 4 days from today
+    NOW() - INTERVAL 2 DAY, -- returned 2 days ago (early)
+    1,  'Excellent condition at checkout', -- loan condition id and notes
+    1,  'Excellent upon return', -- return condition id and notes
+    0.00, TRUE, NULL, -- no fees, all accessories returned
+    'Citizen Casey Rivera returned BIN-0004 early in excellent condition. Handled by Employee One.'
+),
+
+-- (5) OVERDUE — Morgan Reyes BIN-0005 via Employee Two
+(
+    5,  -- bin_id BIN-0005 (Hotspot)
+    3,  -- loan_status_id Overdue
+    9,  -- citizen_id Morgan Reyes
+    4,  -- employee_id Employee Two
+    NOW() - INTERVAL 18 DAY, -- loan started 18 days ago
+    NOW() - INTERVAL 4 DAY, -- due 4 days ago (overdue)
+    NULL, -- not yet returned
+    2,  'Good at checkout', -- loan condition id and notes
+    NULL, NULL, -- no return condition yet
+    0.00, FALSE, 'power adapter missing', -- missing accessories
+    'Citizen Morgan Reyes borrowed BIN-0005 but has not yet returned it. Called and said they are still looking for the power adapter. The loan is now overdue by 4 days.'
+),
+
+-- (6) LOST — Jamie Nguyen BIN-0006 via Employee One
+(
+    6,  -- bin_id BIN-0006 (Laptop)
+    4,  -- loan_status_id Lost
+    6,  -- citizen_id Jamie Nguyen
+    3,  -- employee_id Employee One
+    NOW() - INTERVAL 24 DAY, -- loan started 24 days ago
+    NOW() - INTERVAL 10 DAY, -- due 14 days after start (10 days ago)
+    NULL, -- never returned
+    4,  'Poor at checkout', -- loan condition id and notes
+    NULL, NULL, -- no return condition
+    0.00, FALSE, 'All accessories', -- missing accessories
+    'Citizen Jamie Nguyen reported BIN-0006 as lost. The laptop was marked poor condition at checkout. No fees have been applied.'
+),
+
+-- (7) CANCELLED — Alex Martinez BIN-0002 via Employee Two
+(
+    2,  -- bin_id BIN-0002 (Tablet + Hotspot)
+    5,  -- loan_status_id Cancelled
+    5,  -- citizen_id Alex Martinez
+    4,  -- employee_id Employee Two
+    NOW() - INTERVAL 1 DAY, -- loan scheduled to start yesterday
+    NOW() - INTERVAL 1 DAY + INTERVAL 14 DAY, -- due 13 days from today (would have been a 14-day rental)
+    NULL, -- cancelled before checkout
+    1,  'Cancelled before checkout', -- loan condition id and notes
+    NULL, NULL, -- never loaned
+    0.00, TRUE, NULL, 
+    'Loan for citizen Alex Martinez and BIN-0002 was cancelled before checkout by Employee Two.'
+);
+
+-- ()
 -- =================================================
 -- END OF SEED DATA 
 -- =================================================

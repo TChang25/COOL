@@ -1,98 +1,188 @@
-# LocationAPI
+# Location API
 
-## LocationController
-### GET All Locations
-First, navigate to our `LocationController` URL: `http://localhost:8080/api/locations`. This page should load without errors and display the test items from the `location` table in the database.
+The Location API manages all physical site data within the system. It provides full CRUD (Create, Read, Update, Delete) functionality for handling location records, allowing the system to store and retrieve important information such as address, city, state, and contact details for each site.
 
-![alt text](../../../MD2_images/ApiLocationsPage.png)
+These endpoints serve as the foundation for connecting users, devices, and activities to specific physical locations. This API is primarily intended for administrative and system-level operations. Employees or system administrators will use it to register new locations, update existing details, or remove outdated entries. Regular users will typically only see this information displayed through the application interface rather than modify it directly.
 
-Next, open a new Postman tab, select the `GET` method, and enter the same URL to retrieve a list of all locations stored in the database.
+All interactions with locations are performed via the `/api/locations` endpoints.
 
-![alt text](../../../MD2_images/GetAllLocations.png)
+---
 
-### GET Single Location
-Use the `GET` method to retrieve a specific location by its ID. Replace `{id}` with the numeric ID of the location you want to retrieve.
-**URL:**
-`http://localhost:8080/api/locations/{id}`
-
-![alt text](../../../MD2_images/GetSelectedID.png)
-
-### POST a New Location
-The `POST` method allows us to create a new location in the database. In Postman, select `POST`, set the URL to `http://localhost:8080/api/locations`, and use the `Body` tab with `raw` JSON.
-
-**Example JSON:**
-
-```JSON
+## Create a New Location
+This function allows an authorized user to create a new location record in the system.
+```
+POST /api/locations
+```
+**Request Body:**
+```json
 {
-    "locationName": "West Side Center",
-    "address": "789 Pine Rd, Orlando, FL"
+  "locationName": string,
+  "streetAddress": string,
+  "city": string,
+  "state": string,
+  "zipCode": string,
+  "contactNumber": string
+}
+```
+**Required fields:**
+- locationName (string)
+
+**Example Request:**
+```json
+{
+  "locationName": "Downtown Recreation Center",
+  "streetAddress": "500 S Orange Ave",
+  "city": "Orlando",
+  "state": "FL",
+  "zipCode": "32801",
+  "contactNumber": "407-555-1234"
+}
+```
+**Response:**
+```json
+201 Created
+{
+  "locationId": 17,
+  "locationName": "Downtown Recreation Center",
+  "streetAddress": "500 S Orange Ave",
+  "city": "Orlando",
+  "state": "FL",
+  "zipCode": "32801",
+  "contactNumber": "407-555-1234",
+  "createdAt": "2025-11-27T06:37:17.152599",
+  "updatedAt": "2025-11-27T06:37:17.152599"
+}
+```
+**Error Responses:**
+```json
+400 Bad Request
+{
+  "error": "Location name is required"
 }
 ```
 
-![alt text](../../../MD2_images/PostLocationData.png)
+---
 
-### PUT / Update Location
-The `PUT` method updates an existing location. Replace `{id}` with the location ID you want to update, then provide the updated information in the body as raw JSON.
+## Retrieve All Locations
+This function allows an authorized user to retrieve every location record in the system.
+```
+GET /api/locations
+```
+**Response:**
+```json
+200 OK
+[
+  {
+    "locationId": 1,
+    "locationName": "Callahan Neighborhood Center",
+    "streetAddress": "101 N. Parramore Ave Ste. 1713",
+    "city": "Orlando",
+    "state": "FL",
+    "zipCode": "32801",
+    "contactNumber": "407-246-4442",
+    "createdAt": "2025-10-15T20:06:03.000+00:00",
+    "updatedAt": "2025-10-15T20:06:03.000+00:00"
+  }
+  // more locations...
+]
+```
 
-**Example JSON for update:**
-```JSON
+---
+
+## Retrieve a Specific Location
+This function allows an authorized user to retrieve a specific location record by its ID.
+```
+GET /api/locations/{id}
+```
+**Response:**
+```json
+200 OK
 {
-    "locationName": "Downtown Hub",
-    "address": "123 Main St, Orlando, FL"
+  "locationId": 17,
+  "locationName": "Downtown Recreation Center",
+  "streetAddress": "500 S Orange Ave",
+  "city": "Orlando",
+  "state": "FL",
+  "zipCode": "32801",
+  "contactNumber": "407-555-1234",
+  "createdAt": "2025-11-27T06:37:17.152599",
+  "updatedAt": "2025-11-27T06:37:17.152599"
+}
+```
+**Error Response:**
+```json
+404 Not Found
+{
+  "error": "Location not found with ID {id}"
 }
 ```
 
-![alt text](../../../MD2_images/PutUpdate.png)
+---
 
-### DELETE a Location
-The `DELETE` method removes a specific location from the database. Replace `{id}` with the ID of the location to delete.
-
-**URL:**
-
-![alt text](../../../MD2_images/DELETElocation.png)
-
-Now that we’ve tested the Location endpoints in real time, we will apply the same testing approach to the remaining controllers.
-
-## UserLocationController
-
-### GET All User-Locations
-URL: `http://localhost:8080/api/user-locations`
-
-![alt text](../../../MD2_images/GetListUserLocation.png)
-
-### GET Single User-Location
-URL: `http://localhost:8080/api/user-locations/{id}`
-
-![alt text](../../../MD2_images/GetSelectedUserLocation.png)
-
-### POST a New User-Location
-URL: `http://localhost:8080/api/user-locations`
-Method: POST
-Body (raw JSON using userId and locationId):
-```JSON
+## Update an Existing Location
+This function allows an authorized user to update an existing location record.
+```
+PUT /api/locations/{id}
+```
+**Request Body:**
+```json
 {
-    "userId": 5,
-    "locationId": 1
+  "locationName": string,
+  "streetAddress": string,
+  "city": string,
+  "state": string,
+  "zipCode": string,
+  "contactNumber": string
+}
+```
+**Example Request:**
+```json
+{
+  "locationName": "Downtown Recreation Center",
+  "streetAddress": "500 S Orange Ave",
+  "city": "Orlando",
+  "state": "FL",
+  "zipCode": "32801",
+  "contactNumber": "954-555-1234"
+}
+```
+**Response:**
+```json
+200 OK
+{
+  "locationId": 17,
+  "locationName": "Downtown Recreation Center",
+  "streetAddress": "500 S Orange Ave",
+  "city": "Orlando",
+  "state": "FL",
+  "zipCode": "32801",
+  "contactNumber": "954-555-1234",
+  "createdAt": "2025-11-25T06:37:17",
+  "updatedAt": "2025-11-25T06:47:17"
+}
+```
+**Error Response:**
+```json
+404 Not Found
+{
+  "error": "Location not found with id {id}"
 }
 ```
 
-![alt text](../../../MD2_images/PostUserLocation.png)
+---
 
-### PUT / Update User-Location
-URL: `http://localhost:8080/api/user-locations/{id}`
-Method: PUT
-Body (raw JSON):
-```JSON
+## Remove a Location
+This function allows an authorized user to delete a location record from the system.
+```
+DELETE /api/locations/{id}
+```
+**Response:**
+- Status: 204 No Content (on success, no content returned)
+
+**Error Response:**
+```json
+404 Not Found
 {
-    "userId": 5,
-    "locationId": 2
+  "error": "Location not found with ID {id}"
 }
 ```
-
-![alt text](../../../MD2_images/PutUserLocation.png)
-
-### DELETE a User-Location
-URL: `http://localhost:8080/api/user-locations/{id}`
-Method: DELETE
-
-![alt text](../../../MD2_images/DeleteUserLocation.png)
