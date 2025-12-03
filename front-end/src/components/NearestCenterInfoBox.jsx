@@ -1,14 +1,6 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { Box, Stack, Typography } from "@mui/material";
 import Button from "./Button";
-import { centers, devices } from "../data/mockData";
-
-// Availability by center/type (true if ANY device of that type is Available at that center)
-function getTypeAvailabilityForCenter(centerName, devicesList) {
-  const byCenter = devicesList.filter((d) => d.location === centerName);
-  const has = (t) => byCenter.some((d) => d.type === t && d.status === "Available");
-  return { laptop: has("Laptop"), tablet: has("Tablet"), hotspot: has("Hotspot") };
-}
 
 // the Haversine formula: this calculates distance between two latitude and longitude points
 // (for the "distance from user location to the center location" feature)
@@ -27,6 +19,31 @@ function haversineMiles(a, b) {
   return 2 * R * Math.asin(Math.sqrt(h)); // final distance in miles
 }
 
+// Uses Nominatim (OpenStreetMap) to convert a full address string into {lat, lng}
+// If anything fails, it falls back to a default Orlando-ish coordinate.
+async function geocodeAddress(query) {
+  try {
+    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+      query
+    )}`;
+    const response = await fetch(url);
+
+    if (response.ok) {
+      const data = await response.json();
+      if (Array.isArray(data) && data.length > 0) {
+        return {
+          lat: parseFloat(data[0].lat),
+          lng: parseFloat(data[0].lon),
+        };
+      }
+    }
+  } catch (err) {
+    console.error("Error geocoding address:", err);
+  }
+  // Fallback: Orlando city center (prevents the UI from breaking)
+  return { lat: 28.53833, lng: -81.37924 };
+}
+
 // Builds Google Maps search URL for "Get Directions" button
 // (The encodeURIComponent() method encodes special characters like: , / ? : @ & = + $ #)
 function mapsUrl(address) {
@@ -38,21 +55,15 @@ function CenterRow({
   index, // the number in the results list
   center, // a community center object (object is created by useMemo in the NearestCenterInfoBox component)
   distanceMiles, // distance from user's location (if available)
-  availability, // object like { laptop: true/false, tablet: ..., hotspot: ... } (apart of the center object created by useMemo)
   eligibilityRoute = "/eligibility", // Where the Check Eligibility button should link to
   availabilityRoute = "/device", // Where the Device Availability button should link to
   onFocusOnMap, // optional callback to tell your map which center to highlight
 }) {
-  // availabilityText is a helper formatting function that just converts availability boolean values into readable text.
-  // Takes in a label and boolean value and returns formatted string
-  const availabilityText = (label, isAvailable) =>
-    `${label}: ${isAvailable ? "✓ Available" : "✗ Not Available"}`;
-
   return (
     <Box
       sx={{
         p: 2,
-        marginBottom: 5,
+        marginBottom: 2,
         bgcolor: "primary.dark",
         color: "white",
         boxShadow: 2,
@@ -66,11 +77,11 @@ function CenterRow({
         },
       }}
       // highlights this center on a map when hovering
-      onMouseEnter={() => onFocusOnMap && onFocusOnMap(center.id)}
+      onMouseEnter={() => onFocusOnMap && onFocusOnMap(center.locationId)}
     >
       <Typography variant="h6" sx={{ fontWeight: 700 }}>
         {/* number in the results list with the center name */}
-        {index}. {center.name}
+        {index}. {center.locationName}
         {/* distance to center from address entered */}
         {Number.isFinite(distanceMiles) && (
           <Typography component="span" sx={{ marginLeft: 1, fontWeight: 500 }}>
@@ -78,24 +89,20 @@ function CenterRow({
           </Typography>
         )}
       </Typography>
-      {/* address, hours and phone number of the center  */}
-      <Typography sx={{ marginTop: 1 }}>{center.address}</Typography>
-      <Typography sx={{ marginTop: 0.5 }}>
-        Hours: {center.hours} | Phone: {center.phone}
-      </Typography>
-      {/* availability of device types */}
-      <Typography sx={{ marginTop: 1.5 }}>
-        {availabilityText("Laptop", availability.laptop)} |{" "}
-        {availabilityText("Tablet", availability.tablet)} |{" "}
-        {availabilityText("Hotspot", availability.hotspot)}
-      </Typography>
+
+      {/* full street address */}
+      <Typography sx={{ marginTop: 0.5, marginLeft: 5 }}>{center.fullAddress}</Typography>
+
+      {/* hours (not in DB yet → show fallback message) + phone */}
+      <Typography sx={{ marginTop: 0.5, marginLeft: 5 }}>Phone: {center.contactNumber}</Typography>
+
       {/* this Stack component holds the action buttons */}
       <Stack
         direction={{ xs: "column", sm: "row" }}
         spacing={2}
         sx={{
-          marginTop: 2,
-          justifyContent: "space-between",
+          marginTop: 1,
+          justifyContent: "space-evenly",
         }}
         useFlexGap
         flexWrap="wrap"
@@ -103,7 +110,7 @@ function CenterRow({
         {/* "Get Directions" button leads to an external link to google maps with the center's address*/}
         <Button
           varianttype="submit"
-          onClick={() => window.open(mapsUrl(center.address), "_blank", "noopener")}
+          onClick={() => window.open(mapsUrl(center.fullAddress), "_blank", "noopener")}
         >
           Get Directions
         </Button>
@@ -123,38 +130,97 @@ function CenterRow({
 
 // This is the main component that lists nearest centers with availability info
 const NearestCenterInfoBox = ({
-  // Optional props you can feed from parent/search/map
-  userCoords = null, // {lat, lng} from the search component input, if no input then null
-  centersData = centers, // array of community centers to show (from mockData.js)
-  devicesData = devices, // array of devices to check availability (from mockData.js)
-  eligibilityRoute = "/eligibility", // route for the Check Eligibility button
-  availabilityRoute = "/device", // route for the Device Availability button
-  onFocusOnMap, // callback to highlight a center on the map
+  userCoords = null, // { lat, lng } from AddressSearch
+  eligibilityRoute = "/eligibility",
+  availabilityRoute = "/device",
+  onFocusOnMap,
 }) => {
-  // useMemo: Only recalculate sorting and distance when inputs change
-  // compute distance and availability, then sort by distance if we have coords
+  const [centersData, setCentersData] = useState([]); // locations from DB (+ coords)
+  const [devicesData, setDevicesData] = useState([]); // devices from DB
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState(null);
+
+  // -------------------------
+  // Fetch locations + devices, then geocode locations
+  // -------------------------
+  useEffect(() => {
+    async function loadData() {
+      setIsLoading(true);
+      setLoadError(null);
+
+      try {
+        const locationsRes = await fetch("/api/locations");
+
+        if (!locationsRes.ok) {
+          throw new Error("Failed to load locations");
+        }
+
+        const locations = await locationsRes.json();
+
+        // 2) Build fullAddress string for each location
+        const locationsWithAddress = locations.map((loc) => {
+          const fullAddress = [loc.streetAddress, loc.city, loc.state, loc.zipCode]
+            .filter(Boolean)
+            .join(", ");
+
+          return {
+            ...loc,
+            fullAddress,
+            // coords will be added later
+          };
+        });
+
+        // 3) Immediately show data from the backend
+        setCentersData(locationsWithAddress);
+
+        // We are done talking to our own API, so stop "Loading…" state now
+        setIsLoading(false);
+
+        // 4) Geocode in the background (do NOT await this in loadData)
+        Promise.all(
+          locationsWithAddress.map(async (loc) => {
+            const coords = await geocodeAddress(loc.fullAddress);
+            return { ...loc, coords };
+          })
+        )
+          .then((geocodedLocations) => {
+            // Update centers with coords once geocoding finishes
+            setCentersData(geocodedLocations);
+          })
+          .catch((err) => {
+            console.error("Error geocoding locations:", err);
+            // optional: you could set some 'geocodeError' state here if you want
+          });
+      } catch (err) {
+        console.error("Error loading locations:", err);
+        setLoadError("Unable to load locations from the server.");
+        setIsLoading(false); // make sure we don't get stuck
+      }
+    }
+
+    loadData();
+  }, []);
+
+  // -------------------------
+  // Compute distance + availability, then sort rows
+  // -------------------------
   const rows = useMemo(() => {
-    // Add distance and availability to each center
+    if (!centersData || centersData.length === 0) return [];
+
     const enriched = centersData.map((c) => {
-      // if we have user coords, calculate distance, else NaN
-      const distanceMiles = userCoords ? haversineMiles(userCoords, c.coords) : NaN;
-      // calls function that returns an object that contains the data to get availability of device types at center
-      const availability = getTypeAvailabilityForCenter(c.name, devicesData);
-      // return new object with center, distance, and availability
-      return { center: c, distanceMiles, availability };
+      const distanceMiles = userCoords && c.coords ? haversineMiles(userCoords, c.coords) : NaN;
+
+      return { center: c, distanceMiles };
     });
 
-    // Sort by nearest if we know user location, otherwise just sort alphabetically
     if (userCoords) {
       enriched.sort((a, b) => a.distanceMiles - b.distanceMiles);
     } else {
-      enriched.sort((a, b) => a.center.name.localeCompare(b.center.name));
+      enriched.sort((a, b) => a.center.locationName.localeCompare(b.center.locationName));
     }
 
-    // return the final array with calculated and sorted data
     return enriched;
-    // this is the dependency array for "useMemo" useEffect
-  }, [centersData, devicesData, userCoords]); // re-runs "useMemo" if any of these change
+  }, [centersData, userCoords]);
 
   return (
     <Box
@@ -174,20 +240,33 @@ const NearestCenterInfoBox = ({
         "&::-webkit-scrollbar": { display: "none" },
       }}
     >
-      {/* "rows" was created by useMemo. It is an array of center info with distance and availability */}
-      {rows.map((row, i) => (
-        // "CenterRow" is the component that displays each community center info card
-        <CenterRow
-          key={row.center.id} // each item must have a unique key
-          index={i + 1} // this will show 1, 2, 3... in the list instead of 0, 1, 2...
-          center={row.center} // the full center object
-          distanceMiles={row.distanceMiles} // distance from user
-          availability={row.availability} // availability of device types
-          eligibilityRoute={eligibilityRoute} // route to eligibility page
-          availabilityRoute={availabilityRoute} // route to device availability page
-          onFocusOnMap={onFocusOnMap} // callback to highlight on map
-        />
-      ))}
+      {isLoading && <Typography>Loading nearest centers…</Typography>}
+
+      {loadError && (
+        <Typography color="error" sx={{ mt: 1 }}>
+          {loadError}
+        </Typography>
+      )}
+
+      {!isLoading && !loadError && rows.length === 0 && <Typography>No centers found.</Typography>}
+
+      <Typography sx={{ fontSize: 14, display: "flex", justifyContent: "center" }}>
+        Distances are approximate
+      </Typography>
+
+      {!isLoading &&
+        !loadError &&
+        rows.map((row, i) => (
+          <CenterRow
+            key={row.center.locationId}
+            index={i + 1}
+            center={row.center}
+            distanceMiles={row.distanceMiles}
+            eligibilityRoute={eligibilityRoute}
+            availabilityRoute={availabilityRoute}
+            onFocusOnMap={onFocusOnMap}
+          />
+        ))}
     </Box>
   );
 };
