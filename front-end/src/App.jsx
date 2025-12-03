@@ -7,9 +7,8 @@ import DeviceCheckIn from "./pages/DeviceCheckIn";
 import DeviceCheckOut from "./pages/DeviceCheckOut";
 import { Routes, Route } from "react-router-dom";
 import NavBar from "./components/NavBar";
-import Admin from './pages/AdminDashboardPage'
+import Admin from "./pages/AdminDashboardPage";
 import EligibilityPage from "./pages/EligibilityPage";
-
 
 function App() {
   return (
