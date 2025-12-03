@@ -151,3 +151,8 @@ vite.config.ts.timestamp-*
 !.env.sample
 
 */target
+*venv
+target
+
+*.pem
+*wsl_weasy_venv*
