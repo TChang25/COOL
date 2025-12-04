@@ -9,6 +9,8 @@ import { Routes, Route } from "react-router-dom";
 import NavBar from "./components/NavBar";
 import Admin from "./pages/AdminDashboardPage";
 import EligibilityPage from "./pages/EligibilityPage";
+import CreateDeviceForm from "./components/CreateDeviceForm";
+import EditDeviceForm from "./components/EditDeviceForm";
 
 function App() {
   return (
@@ -23,6 +25,8 @@ function App() {
         <Route path="/DeviceCheckOut" element={<DeviceCheckOut />} />
         <Route path="/admin" element={<Admin />} />
         <Route path="/eligibility" element={<EligibilityPage />} />
+        <Route path="/devices/edit/:id" element={<EditDeviceForm />} />
+        <Route path="/devices/create" element={<CreateDeviceForm />} />
       </Routes>
     </>
   );
