@@ -6,6 +6,7 @@ import DeviceInventory from "../components/DeviceInventory";
 import EmployeeManagement from "../components/EmployeeManagement";
 import UsageStatistics from "../components/UsageStatistics";
 import LoanTable from "../components/LoanTable";
+import UserTable from "../components/UserTable";
 
 const AdminDashboardPage = () => {
   const navigate = useNavigate();
@@ -54,6 +55,7 @@ const AdminDashboardPage = () => {
         <DeviceInventory />
         <UsageStatistics />
         <EmployeeManagement />
+        <UserTable />
       </Box>
     </Box>
   );

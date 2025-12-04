@@ -1,14 +1,48 @@
-import React, { useState } from "react";
-import { centers } from "../data/mockData"; // 👈 import from your mockData
+import React, { useState, useEffect } from "react";
 import DeviceAvailabilityTable from "../components/DeviceAvailabilityTable";
 import { Box, Typography } from "@mui/material";
 import Button from "../components/Button";
 import FilterCenter from "../components/FilterCenter";
+import { useAuth } from "../context/MockAuth";
 
 const DeviceAvailabilityPage = () => {
   const [selectedCenter, setSelectedCenter] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("All");
 
+  // NEW: locations loaded from backend
+  const [locations, setLocations] = useState([]);
+
+  const { user } = useAuth();
+  const role = user?.role || "Citizen";
+
+  // ------------------------------------------------------
+  // FETCH LOCATIONS FROM BACKEND
+  // ------------------------------------------------------
+  useEffect(() => {
+    const loadLocations = async () => {
+      try {
+        const res = await fetch("/api/locations");
+
+        if (!res.ok) throw new Error("Failed to load locations");
+
+        const data = await res.json();
+
+        // Convert locations into FilterCenter format: { name: "Location Name" }
+        const formatted = data.map((loc) => ({
+          name: loc.locationName,
+          id: loc.locationId,
+        }));
+
+        setLocations(formatted);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    loadLocations();
+  }, []);
+
+  // ------------------------------------------------------
   const handleCenterChange = (center) => {
     setSelectedCenter(center);
     setSelectedFilter("All");
@@ -30,16 +64,11 @@ const DeviceAvailabilityPage = () => {
         paddingTop: "60px",
       }}
     >
-      <Typography
-        variant="h1"
-        sx={{
-          mb: 4,
-        }}
-      >
+      <Typography variant="h1" sx={{ mb: 4 }}>
         Device Availability
       </Typography>
 
-      {/* Top row */}
+      {/* Top Row */}
       <Box
         sx={{
           display: "flex",
@@ -54,9 +83,9 @@ const DeviceAvailabilityPage = () => {
           Check Eligibility
         </Button>
 
-        {/* 🔹 Filter for Center */}
+        {/* 🔹 REAL LOCATIONS FILTER */}
         <FilterCenter
-          centers={centers.map((c) => ({ name: c.name }))} // instead of locations.map
+          centers={locations} // ⬅️ now using DB data
           value={selectedCenter}
           onChange={handleCenterChange}
         />
@@ -66,8 +95,8 @@ const DeviceAvailabilityPage = () => {
         </Button>
       </Box>
 
-      {/* 🔹 Filter for Device Type / Availability */}
-      <FilterCenter
+      {/* 🔹 Status / Type Filter */}
+      {/* <FilterCenter
         centers={[
           { name: "All" },
           { name: "Available" },
@@ -81,9 +110,18 @@ const DeviceAvailabilityPage = () => {
         value={selectedFilter}
         onChange={handleDeviceFilterChange}
         label="Filter by status or type"
-      />
+      /> */}
 
-      {/* 📊 Device Table */}
+      {/* CREATE DEVICE BUTTON — EMPLOYEE + ADMIN ONLY */}
+      {role !== "Citizen" && (
+        <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 2 }}>
+          <Button varianttype="create" route="/devices/create">
+            Create Device
+          </Button>
+        </Box>
+      )}
+
+      {/* DEVICE TABLE */}
       <DeviceAvailabilityTable
         selectedCenter={selectedCenter}
         selectedFilter={selectedFilter}
