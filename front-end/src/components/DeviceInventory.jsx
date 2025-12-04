@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -12,15 +12,15 @@ import {
   CircularProgress,
   Typography,
   Box,
-} from "@mui/material"
-import mockInventoryData from "../data/mockInventory.json"
+} from "@mui/material";
 
+// ========== STYLED COMPONENTS ==========
 const StyledTableContainer = styled(TableContainer)(({ theme }) => ({
   boxShadow: theme.shadows[1],
   margin: theme.spacing(4),
   borderRadius: theme.shape.borderRadius,
   overflow: "hidden",
-}))
+}));
 
 const StyledTable = styled(Table)(({ theme }) => ({
   tableLayout: "auto",
@@ -31,7 +31,7 @@ const StyledTable = styled(Table)(({ theme }) => ({
       borderRight: "none",
     },
   },
-}))
+}));
 
 const TableTitleRow = styled(TableRow)(({ theme }) => ({
   backgroundColor: theme.palette.primary.main,
@@ -45,7 +45,7 @@ const TableTitleRow = styled(TableRow)(({ theme }) => ({
     fontFamily: theme.typography.fontFamily,
     borderBottom: "none",
   },
-}))
+}));
 
 const StyledTableHead = styled(TableHead)(({ theme }) => ({
   backgroundColor: theme.palette.primary.main,
@@ -62,7 +62,7 @@ const StyledTableHead = styled(TableHead)(({ theme }) => ({
   "& .MuiTableRow-root": {
     borderBottom: `1px solid ${theme.palette.primary.contrastText}`,
   },
-}))
+}));
 
 const StyledTableRow = styled(TableRow)(({ theme }) => ({
   backgroundColor: theme.palette.primary.main,
@@ -77,7 +77,7 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
     fontFamily: theme.typography.fontFamily,
     borderBottom: `1px solid ${theme.palette.primary.contrastText}40`,
   },
-}))
+}));
 
 const StyledTableFooter = styled(TableFooter)(({ theme }) => ({
   backgroundColor: theme.palette.primary.main,
@@ -90,26 +90,26 @@ const StyledTableFooter = styled(TableFooter)(({ theme }) => ({
     verticalAlign: "middle",
     fontFamily: theme.typography.fontFamily,
   },
-}))
+}));
 
 const StyledCenterNameCell = styled(TableCell)(({ theme }) => ({
   textAlign: "left",
   verticalAlign: "middle",
   fontFamily: theme.typography.fontFamily,
-}))
+}));
 
 const StyledCenteredCell = styled(TableCell)(({ theme }) => ({
   textAlign: "center",
   verticalAlign: "middle",
   fontFamily: theme.typography.fontFamily,
-}))
+}));
 
 const StyledFooterCell = styled(TableCell)(({ theme }) => ({
   textAlign: "center",
   verticalAlign: "middle",
   fontFamily: theme.typography.fontFamily,
   fontWeight: 600,
-}))
+}));
 
 const LoadingContainer = styled(Box)(({ theme }) => ({
   display: "flex",
@@ -117,7 +117,7 @@ const LoadingContainer = styled(Box)(({ theme }) => ({
   alignItems: "center",
   padding: theme.spacing(8),
   minHeight: "200px",
-}))
+}));
 
 const ErrorContainer = styled(Box)(({ theme }) => ({
   display: "flex",
@@ -127,80 +127,82 @@ const ErrorContainer = styled(Box)(({ theme }) => ({
   padding: theme.spacing(8),
   minHeight: "200px",
   fontFamily: theme.typography.fontFamily,
-}))
+}));
 
-const calculateTotals = (inventoryData) => {
-  const totals = {
-    laptops: { available: 0, total: 0 },
-    tablets: { available: 0, total: 0 },
-    hotspots: { available: 0, total: 0 },
-  }
+// ========== TRANSFORM DEVICE LIST → INVENTORY FORMAT ==========
+function transformDevicesToInventory(devices) {
+  const centers = {};
 
-  inventoryData.forEach((center) => {
-    totals.laptops.available += center.laptops.available
-    totals.laptops.total += center.laptops.total
-    totals.tablets.available += center.tablets.available
-    totals.tablets.total += center.tablets.total
-    totals.hotspots.available += center.hotspots.available
-    totals.hotspots.total += center.hotspots.total
-  })
+  devices.forEach((device) => {
+    const centerName = device.location?.locationName || "Unknown Location";
+    const type = device.type?.deviceTypeName || "Unknown";
+    const status = device.status?.deviceStatusName || "Unknown";
 
-  const totalDevicesAvailable = totals.laptops.available + totals.tablets.available + totals.hotspots.available
-  const totalDevicesTotal = totals.laptops.total + totals.tablets.total + totals.hotspots.total
-  totals.totalDevices = {
-    available: totalDevicesAvailable,
-    total: totalDevicesTotal,
-    percentage: totalDevicesTotal > 0 ? Math.round((totalDevicesAvailable / totalDevicesTotal) * 100) : 0,
-  }
+    if (!centers[centerName]) {
+      centers[centerName] = {
+        centerName,
+        laptops: { available: 0, total: 0 },
+        tablets: { available: 0, total: 0 },
+        hotspots: { available: 0, total: 0 },
+      };
+    }
 
-  totals.laptops.percentage = totals.laptops.total > 0 ? Math.round((totals.laptops.available / totals.laptops.total) * 100) : 0
-  totals.tablets.percentage = totals.tablets.total > 0 ? Math.round((totals.tablets.available / totals.tablets.total) * 100) : 0
-  totals.hotspots.percentage = totals.hotspots.total > 0 ? Math.round((totals.hotspots.available / totals.hotspots.total) * 100) : 0
+    const entry = centers[centerName];
 
-  return totals
+    if (type === "Laptop") {
+      entry.laptops.total++;
+      if (status === "Available") entry.laptops.available++;
+    }
+
+    if (type === "Tablet") {
+      entry.tablets.total++;
+      if (status === "Available") entry.tablets.available++;
+    }
+
+    if (type === "Hotspot") {
+      entry.hotspots.total++;
+      if (status === "Available") entry.hotspots.available++;
+    }
+  });
+
+  return Object.values(centers);
 }
 
-const calculateCenterTotal = (center) => {
-  const available = center.laptops.available + center.tablets.available + center.hotspots.available
-  const total = center.laptops.total + center.tablets.total + center.hotspots.total
-  const percentage = total > 0 ? Math.round((available / total) * 100) : 0
-  return { available, total, percentage }
-}
-
+// ========== FETCH DEVICES FROM BACKEND ==========
 const fetchInventoryData = async () => {
-  await new Promise((resolve) => setTimeout(resolve, 500))
-  
-  // TODO: Replace with actual API call when backend is ready
-  // Example:
-  // const response = await fetch('http://localhost:8080/api/inventory')
-  // if (!response.ok) throw new Error('Failed to fetch inventory data')
-  // return await response.json()
-  
-  return mockInventoryData
-}
+  const response = await fetch("/api/devices");
 
+  if (!response.ok) {
+    throw new Error("Failed to fetch inventory data");
+  }
+
+  const devices = await response.json();
+  return transformDevicesToInventory(devices);
+};
+
+// ========== MAIN COMPONENT ==========
 export default function DeviceInventory() {
-  const [inventoryData, setInventoryData] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const [inventoryData, setInventoryData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const loadInventoryData = async () => {
       try {
-        setLoading(true)
-        setError(null)
-        const data = await fetchInventoryData()
-        setInventoryData(data)
+        setLoading(true);
+        setError(null);
+        const data = await fetchInventoryData();
+        setInventoryData(data);
       } catch (err) {
-        setError(err.message || "Failed to load inventory data")
-        console.error("Error loading inventory data:", err)
+        setError(err.message || "Failed to load inventory data");
+        console.error("Error loading inventory data:", err);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    loadInventoryData()
-  }, [])
+    loadInventoryData();
+  }, []);
 
   if (loading) {
     return (
@@ -209,7 +211,7 @@ export default function DeviceInventory() {
           <CircularProgress />
         </LoadingContainer>
       </StyledTableContainer>
-    )
+    );
   }
 
   if (error) {
@@ -224,22 +226,70 @@ export default function DeviceInventory() {
           </Typography>
         </ErrorContainer>
       </StyledTableContainer>
-    )
+    );
   }
 
   if (!inventoryData || inventoryData.length === 0) {
     return (
       <StyledTableContainer component={Paper}>
         <ErrorContainer>
-          <Typography variant="h6">
-            No inventory data available
-          </Typography>
+          <Typography variant="h6">No inventory data available</Typography>
         </ErrorContainer>
       </StyledTableContainer>
-    )
+    );
   }
 
-  const totals = calculateTotals(inventoryData)
+  const calculateTotals = (inventoryData) => {
+    const totals = {
+      laptops: { available: 0, total: 0 },
+      tablets: { available: 0, total: 0 },
+      hotspots: { available: 0, total: 0 },
+    };
+
+    inventoryData.forEach((center) => {
+      totals.laptops.available += center.laptops.available;
+      totals.laptops.total += center.laptops.total;
+      totals.tablets.available += center.tablets.available;
+      totals.tablets.total += center.tablets.total;
+      totals.hotspots.available += center.hotspots.available;
+      totals.hotspots.total += center.hotspots.total;
+    });
+
+    const totalAvailable =
+      totals.laptops.available +
+      totals.tablets.available +
+      totals.hotspots.available;
+    const totalDevices =
+      totals.laptops.total + totals.tablets.total + totals.hotspots.total;
+
+    totals.totalDevices = {
+      available: totalAvailable,
+      total: totalDevices,
+      percentage:
+        totalDevices > 0
+          ? Math.round((totalAvailable / totalDevices) * 100)
+          : 0,
+    };
+
+    totals.laptops.percentage =
+      totals.laptops.total > 0
+        ? Math.round((totals.laptops.available / totals.laptops.total) * 100)
+        : 0;
+
+    totals.tablets.percentage =
+      totals.tablets.total > 0
+        ? Math.round((totals.tablets.available / totals.tablets.total) * 100)
+        : 0;
+
+    totals.hotspots.percentage =
+      totals.hotspots.total > 0
+        ? Math.round((totals.hotspots.available / totals.hotspots.total) * 100)
+        : 0;
+
+    return totals;
+  };
+
+  const totals = calculateTotals(inventoryData);
 
   return (
     <StyledTableContainer component={Paper}>
@@ -256,9 +306,22 @@ export default function DeviceInventory() {
             <StyledCenteredCell>Total Devices (%)</StyledCenteredCell>
           </TableRow>
         </StyledTableHead>
+
         <TableBody>
           {inventoryData.map((center) => {
-            const centerTotal = calculateCenterTotal(center)
+            const available =
+              center.laptops.available +
+              center.tablets.available +
+              center.hotspots.available;
+
+            const total =
+              center.laptops.total +
+              center.tablets.total +
+              center.hotspots.total;
+
+            const percent =
+              total > 0 ? Math.round((available / total) * 100) : 0;
+
             return (
               <StyledTableRow key={center.centerName}>
                 <StyledCenterNameCell>{center.centerName}</StyledCenterNameCell>
@@ -272,31 +335,35 @@ export default function DeviceInventory() {
                   {center.hotspots.available}/{center.hotspots.total}
                 </StyledCenteredCell>
                 <StyledCenteredCell>
-                  {centerTotal.available}/{centerTotal.total} ({centerTotal.percentage}%)
+                  {available}/{total} ({percent}%)
                 </StyledCenteredCell>
               </StyledTableRow>
-            )
+            );
           })}
         </TableBody>
+
         <StyledTableFooter>
           <TableRow>
             <StyledFooterCell></StyledFooterCell>
             <StyledFooterCell>
-              {totals.laptops.available}/{totals.laptops.total} ({totals.laptops.percentage}%)
+              {totals.laptops.available}/{totals.laptops.total} (
+              {totals.laptops.percentage}%)
             </StyledFooterCell>
             <StyledFooterCell>
-              {totals.tablets.available}/{totals.tablets.total} ({totals.tablets.percentage}%)
+              {totals.tablets.available}/{totals.tablets.total} (
+              {totals.tablets.percentage}%)
             </StyledFooterCell>
             <StyledFooterCell>
-              {totals.hotspots.available}/{totals.hotspots.total} ({totals.hotspots.percentage}%)
+              {totals.hotspots.available}/{totals.hotspots.total} (
+              {totals.hotspots.percentage}%)
             </StyledFooterCell>
             <StyledFooterCell>
-              {totals.totalDevices.available}/{totals.totalDevices.total} ({totals.totalDevices.percentage}%)
+              {totals.totalDevices.available}/{totals.totalDevices.total} (
+              {totals.totalDevices.percentage}%)
             </StyledFooterCell>
           </TableRow>
         </StyledTableFooter>
       </StyledTable>
     </StyledTableContainer>
-  )
+  );
 }
-
