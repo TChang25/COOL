@@ -14,6 +14,11 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
 import org.springframework.security.web.SecurityFilterChain;
+// CORS related imports
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import java.util.Arrays; // Needed for Arrays.asList
 
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
@@ -39,6 +44,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(csrf -> csrf.disable())
+                .cors(Customizer.withDefaults()) // 1. Add CORS configuration here
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/user-roles/**").hasAuthority("SCOPE_Admin")
@@ -57,6 +63,36 @@ public class SecurityConfig {
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .build();
+    }
+
+    // 2. Define the CorsConfigurationSource bean
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        
+        // --- Configure Allowed Origins ---
+        // Change "http://localhost:3000" to match your frontend's address. 
+        // Use a specific domain instead of "*" if allowCredentials is true (which is recommended for cookies).
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173")); 
+        
+        // --- Configure Allowed Methods ---
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        
+        // --- Configure Allowed Headers ---
+        // Allow all headers, which is often necessary for Authorization/Content-Type.
+        configuration.setAllowedHeaders(Arrays.asList("*")); 
+        
+        // --- Important for JWT in Cookies ---
+        // Must be 'true' for the browser to send cookies, HTTP authentication, and client-side SSL certificates.
+        configuration.setAllowCredentials(true); 
+        
+        // Set the maximum age for preflight OPTIONS requests (3600 seconds = 1 hour)
+        configuration.setMaxAge(3600L); 
+        
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        // Apply this configuration to all paths (/**)
+        source.registerCorsConfiguration("/**", configuration); 
+        return source;
     }
 
     @Bean

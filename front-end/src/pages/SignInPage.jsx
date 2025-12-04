@@ -20,7 +20,7 @@ const [formData, setFormData] = useState({
   
    const [error, setError] = useState("");
   
-  const handleChange = (e) => {
+  const handleChange = async (e) => {
     const { name, value } = e.target;
     setFormData((prevState) => ({
       ...prevState,
@@ -29,10 +29,10 @@ const [formData, setFormData] = useState({
     setError(""); // clear error when user types again
   };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
     e.preventDefault();
     console.log(formData);
-     const { success, user } = login(formData.email, formData.password);
+     const { success, user } = await login(formData.email, formData.password);
 
      if (success) {
        setError("");
