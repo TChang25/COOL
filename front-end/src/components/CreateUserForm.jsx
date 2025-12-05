@@ -121,7 +121,15 @@ export default function CreateUserForm() {
         paddingTop: "60px",
       }}
     >
-      <Paper sx={{ p: 4, width: "500px", textAlign: "center" }}>
+      <Paper
+        sx={{
+          p: 4,
+          width: "500px",
+          textAlign: "center",
+          backgroundColor: "#002D72",
+          color: "white",
+        }}
+      >
         <Typography variant="h5" sx={{ mb: 2 }}>
           Create New User
         </Typography>
@@ -133,7 +141,50 @@ export default function CreateUserForm() {
         <form onSubmit={handleSubmit}>
           <TextField
             fullWidth
-            sx={{ mb: 2 }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "5px",
+                backgroundColor: "white", // white box
+                color: "#2C2C2C", // dark gray input text
+                caretColor: "#2C2C2C",
+
+                "& input, & textarea": {
+                  color: "#2C2C2C", // dark gray inside text
+                  textAlign: "left", // ensure left-aligned text
+                },
+
+                "& fieldset": {
+                  borderColor: "white", // border
+                },
+                "&:hover fieldset": {
+                  borderColor: "white",
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "white",
+                },
+                "& .MuiSelect-icon": {
+                  color: "#2C2C2C", // dropdown arrow
+                },
+              },
+
+              // ✅ Label always above, white, and left-aligned
+              "& .MuiInputLabel-root": {
+                color: "white",
+                fontWeight: 600,
+                fontSize: "1rem",
+                transform: "none", // stop floating behavior
+                position: "relative", // keep above input
+                marginBottom: "4px",
+                textAlign: "left", // keep label left-aligned
+              },
+              "& .MuiInputLabel-root.Mui-focused": {
+                color: "white", // stays white when focused
+              },
+
+              "& .MuiFormHelperText-root": {
+                color: "white", // helper/error text white if needed
+              },
+            }}
             label="Full Name"
             name="fullName"
             value={user.fullName}
@@ -142,7 +193,50 @@ export default function CreateUserForm() {
           />
           <TextField
             fullWidth
-            sx={{ mb: 2 }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "5px",
+                backgroundColor: "white", // white box
+                color: "#2C2C2C", // dark gray input text
+                caretColor: "#2C2C2C",
+
+                "& input, & textarea": {
+                  color: "#2C2C2C", // dark gray inside text
+                  textAlign: "left", // ensure left-aligned text
+                },
+
+                "& fieldset": {
+                  borderColor: "white", // border
+                },
+                "&:hover fieldset": {
+                  borderColor: "white",
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "white",
+                },
+                "& .MuiSelect-icon": {
+                  color: "#2C2C2C", // dropdown arrow
+                },
+              },
+
+              // ✅ Label always above, white, and left-aligned
+              "& .MuiInputLabel-root": {
+                color: "white",
+                fontWeight: 600,
+                fontSize: "1rem",
+                transform: "none", // stop floating behavior
+                position: "relative", // keep above input
+                marginBottom: "4px",
+                textAlign: "left", // keep label left-aligned
+              },
+              "& .MuiInputLabel-root.Mui-focused": {
+                color: "white", // stays white when focused
+              },
+
+              "& .MuiFormHelperText-root": {
+                color: "white", // helper/error text white if needed
+              },
+            }}
             label="Email"
             name="email"
             value={user.email}
@@ -151,7 +245,50 @@ export default function CreateUserForm() {
           />
           <TextField
             fullWidth
-            sx={{ mb: 2 }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "5px",
+                backgroundColor: "white", // white box
+                color: "#2C2C2C", // dark gray input text
+                caretColor: "#2C2C2C",
+
+                "& input, & textarea": {
+                  color: "#2C2C2C", // dark gray inside text
+                  textAlign: "left", // ensure left-aligned text
+                },
+
+                "& fieldset": {
+                  borderColor: "white", // border
+                },
+                "&:hover fieldset": {
+                  borderColor: "white",
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "white",
+                },
+                "& .MuiSelect-icon": {
+                  color: "#2C2C2C", // dropdown arrow
+                },
+              },
+
+              // ✅ Label always above, white, and left-aligned
+              "& .MuiInputLabel-root": {
+                color: "white",
+                fontWeight: 600,
+                fontSize: "1rem",
+                transform: "none", // stop floating behavior
+                position: "relative", // keep above input
+                marginBottom: "4px",
+                textAlign: "left", // keep label left-aligned
+              },
+              "& .MuiInputLabel-root.Mui-focused": {
+                color: "white", // stays white when focused
+              },
+
+              "& .MuiFormHelperText-root": {
+                color: "white", // helper/error text white if needed
+              },
+            }}
             label="Password"
             type="password"
             name="password"
@@ -161,7 +298,50 @@ export default function CreateUserForm() {
           />
           <TextField
             fullWidth
-            sx={{ mb: 2 }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "5px",
+                backgroundColor: "white", // white box
+                color: "#2C2C2C", // dark gray input text
+                caretColor: "#2C2C2C",
+
+                "& input, & textarea": {
+                  color: "#2C2C2C", // dark gray inside text
+                  textAlign: "left", // ensure left-aligned text
+                },
+
+                "& fieldset": {
+                  borderColor: "white", // border
+                },
+                "&:hover fieldset": {
+                  borderColor: "white",
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "white",
+                },
+                "& .MuiSelect-icon": {
+                  color: "#2C2C2C", // dropdown arrow
+                },
+              },
+
+              // ✅ Label always above, white, and left-aligned
+              "& .MuiInputLabel-root": {
+                color: "white",
+                fontWeight: 600,
+                fontSize: "1rem",
+                transform: "none", // stop floating behavior
+                position: "relative", // keep above input
+                marginBottom: "4px",
+                textAlign: "left", // keep label left-aligned
+              },
+              "& .MuiInputLabel-root.Mui-focused": {
+                color: "white", // stays white when focused
+              },
+
+              "& .MuiFormHelperText-root": {
+                color: "white", // helper/error text white if needed
+              },
+            }}
             label="Role ID (1,2,3)"
             name="roleId"
             value={user.roleId}
@@ -170,7 +350,50 @@ export default function CreateUserForm() {
           />
           <TextField
             fullWidth
-            sx={{ mb: 2 }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "5px",
+                backgroundColor: "white", // white box
+                color: "#2C2C2C", // dark gray input text
+                caretColor: "#2C2C2C",
+
+                "& input, & textarea": {
+                  color: "#2C2C2C", // dark gray inside text
+                  textAlign: "left", // ensure left-aligned text
+                },
+
+                "& fieldset": {
+                  borderColor: "white", // border
+                },
+                "&:hover fieldset": {
+                  borderColor: "white",
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "white",
+                },
+                "& .MuiSelect-icon": {
+                  color: "#2C2C2C", // dropdown arrow
+                },
+              },
+
+              // ✅ Label always above, white, and left-aligned
+              "& .MuiInputLabel-root": {
+                color: "white",
+                fontWeight: 600,
+                fontSize: "1rem",
+                transform: "none", // stop floating behavior
+                position: "relative", // keep above input
+                marginBottom: "4px",
+                textAlign: "left", // keep label left-aligned
+              },
+              "& .MuiInputLabel-root.Mui-focused": {
+                color: "white", // stays white when focused
+              },
+
+              "& .MuiFormHelperText-root": {
+                color: "white", // helper/error text white if needed
+              },
+            }}
             label="Street Address"
             name="streetAddress"
             value={user.streetAddress}
@@ -178,7 +401,50 @@ export default function CreateUserForm() {
           />
           <TextField
             fullWidth
-            sx={{ mb: 2 }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "5px",
+                backgroundColor: "white", // white box
+                color: "#2C2C2C", // dark gray input text
+                caretColor: "#2C2C2C",
+
+                "& input, & textarea": {
+                  color: "#2C2C2C", // dark gray inside text
+                  textAlign: "left", // ensure left-aligned text
+                },
+
+                "& fieldset": {
+                  borderColor: "white", // border
+                },
+                "&:hover fieldset": {
+                  borderColor: "white",
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "white",
+                },
+                "& .MuiSelect-icon": {
+                  color: "#2C2C2C", // dropdown arrow
+                },
+              },
+
+              // ✅ Label always above, white, and left-aligned
+              "& .MuiInputLabel-root": {
+                color: "white",
+                fontWeight: 600,
+                fontSize: "1rem",
+                transform: "none", // stop floating behavior
+                position: "relative", // keep above input
+                marginBottom: "4px",
+                textAlign: "left", // keep label left-aligned
+              },
+              "& .MuiInputLabel-root.Mui-focused": {
+                color: "white", // stays white when focused
+              },
+
+              "& .MuiFormHelperText-root": {
+                color: "white", // helper/error text white if needed
+              },
+            }}
             label="City"
             name="city"
             value={user.city}
@@ -186,7 +452,50 @@ export default function CreateUserForm() {
           />
           <TextField
             fullWidth
-            sx={{ mb: 2 }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "5px",
+                backgroundColor: "white", // white box
+                color: "#2C2C2C", // dark gray input text
+                caretColor: "#2C2C2C",
+
+                "& input, & textarea": {
+                  color: "#2C2C2C", // dark gray inside text
+                  textAlign: "left", // ensure left-aligned text
+                },
+
+                "& fieldset": {
+                  borderColor: "white", // border
+                },
+                "&:hover fieldset": {
+                  borderColor: "white",
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "white",
+                },
+                "& .MuiSelect-icon": {
+                  color: "#2C2C2C", // dropdown arrow
+                },
+              },
+
+              // ✅ Label always above, white, and left-aligned
+              "& .MuiInputLabel-root": {
+                color: "white",
+                fontWeight: 600,
+                fontSize: "1rem",
+                transform: "none", // stop floating behavior
+                position: "relative", // keep above input
+                marginBottom: "4px",
+                textAlign: "left", // keep label left-aligned
+              },
+              "& .MuiInputLabel-root.Mui-focused": {
+                color: "white", // stays white when focused
+              },
+
+              "& .MuiFormHelperText-root": {
+                color: "white", // helper/error text white if needed
+              },
+            }}
             label="State"
             name="state"
             value={user.state}
@@ -194,7 +503,50 @@ export default function CreateUserForm() {
           />
           <TextField
             fullWidth
-            sx={{ mb: 2 }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "5px",
+                backgroundColor: "white", // white box
+                color: "#2C2C2C", // dark gray input text
+                caretColor: "#2C2C2C",
+
+                "& input, & textarea": {
+                  color: "#2C2C2C", // dark gray inside text
+                  textAlign: "left", // ensure left-aligned text
+                },
+
+                "& fieldset": {
+                  borderColor: "white", // border
+                },
+                "&:hover fieldset": {
+                  borderColor: "white",
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "white",
+                },
+                "& .MuiSelect-icon": {
+                  color: "#2C2C2C", // dropdown arrow
+                },
+              },
+
+              // ✅ Label always above, white, and left-aligned
+              "& .MuiInputLabel-root": {
+                color: "white",
+                fontWeight: 600,
+                fontSize: "1rem",
+                transform: "none", // stop floating behavior
+                position: "relative", // keep above input
+                marginBottom: "4px",
+                textAlign: "left", // keep label left-aligned
+              },
+              "& .MuiInputLabel-root.Mui-focused": {
+                color: "white", // stays white when focused
+              },
+
+              "& .MuiFormHelperText-root": {
+                color: "white", // helper/error text white if needed
+              },
+            }}
             label="Zip Code"
             name="zipCode"
             value={user.zipCode}
@@ -202,7 +554,50 @@ export default function CreateUserForm() {
           />
           <TextField
             fullWidth
-            sx={{ mb: 2 }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "5px",
+                backgroundColor: "white", // white box
+                color: "#2C2C2C", // dark gray input text
+                caretColor: "#2C2C2C",
+
+                "& input, & textarea": {
+                  color: "#2C2C2C", // dark gray inside text
+                  textAlign: "left", // ensure left-aligned text
+                },
+
+                "& fieldset": {
+                  borderColor: "white", // border
+                },
+                "&:hover fieldset": {
+                  borderColor: "white",
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "white",
+                },
+                "& .MuiSelect-icon": {
+                  color: "#2C2C2C", // dropdown arrow
+                },
+              },
+
+              // ✅ Label always above, white, and left-aligned
+              "& .MuiInputLabel-root": {
+                color: "white",
+                fontWeight: 600,
+                fontSize: "1rem",
+                transform: "none", // stop floating behavior
+                position: "relative", // keep above input
+                marginBottom: "4px",
+                textAlign: "left", // keep label left-aligned
+              },
+              "& .MuiInputLabel-root.Mui-focused": {
+                color: "white", // stays white when focused
+              },
+
+              "& .MuiFormHelperText-root": {
+                color: "white", // helper/error text white if needed
+              },
+            }}
             label="Contact Number"
             name="contactNumber"
             value={user.contactNumber}
@@ -210,7 +605,50 @@ export default function CreateUserForm() {
           />
           <TextField
             fullWidth
-            sx={{ mb: 2 }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "5px",
+                backgroundColor: "white", // white box
+                color: "#2C2C2C", // dark gray input text
+                caretColor: "#2C2C2C",
+
+                "& input, & textarea": {
+                  color: "#2C2C2C", // dark gray inside text
+                  textAlign: "left", // ensure left-aligned text
+                },
+
+                "& fieldset": {
+                  borderColor: "white", // border
+                },
+                "&:hover fieldset": {
+                  borderColor: "white",
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "white",
+                },
+                "& .MuiSelect-icon": {
+                  color: "#2C2C2C", // dropdown arrow
+                },
+              },
+
+              // ✅ Label always above, white, and left-aligned
+              "& .MuiInputLabel-root": {
+                color: "white",
+                fontWeight: 600,
+                fontSize: "1rem",
+                transform: "none", // stop floating behavior
+                position: "relative", // keep above input
+                marginBottom: "4px",
+                textAlign: "left", // keep label left-aligned
+              },
+              "& .MuiInputLabel-root.Mui-focused": {
+                color: "white", // stays white when focused
+              },
+
+              "& .MuiFormHelperText-root": {
+                color: "white", // helper/error text white if needed
+              },
+            }}
             label="DL Number"
             name="dlNum"
             value={user.dlNum}
@@ -218,7 +656,50 @@ export default function CreateUserForm() {
           />
           <TextField
             fullWidth
-            sx={{ mb: 2 }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "5px",
+                backgroundColor: "white", // white box
+                color: "#2C2C2C", // dark gray input text
+                caretColor: "#2C2C2C",
+
+                "& input, & textarea": {
+                  color: "#2C2C2C", // dark gray inside text
+                  textAlign: "left", // ensure left-aligned text
+                },
+
+                "& fieldset": {
+                  borderColor: "white", // border
+                },
+                "&:hover fieldset": {
+                  borderColor: "white",
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "white",
+                },
+                "& .MuiSelect-icon": {
+                  color: "#2C2C2C", // dropdown arrow
+                },
+              },
+
+              // ✅ Label always above, white, and left-aligned
+              "& .MuiInputLabel-root": {
+                color: "white",
+                fontWeight: 600,
+                fontSize: "1rem",
+                transform: "none", // stop floating behavior
+                position: "relative", // keep above input
+                marginBottom: "4px",
+                textAlign: "left", // keep label left-aligned
+              },
+              "& .MuiInputLabel-root.Mui-focused": {
+                color: "white", // stays white when focused
+              },
+
+              "& .MuiFormHelperText-root": {
+                color: "white", // helper/error text white if needed
+              },
+            }}
             label="DL State"
             name="dlState"
             value={user.dlState}
@@ -228,7 +709,50 @@ export default function CreateUserForm() {
           {/* UPDATED DOB FIELD */}
           <TextField
             fullWidth
-            sx={{ mb: 2 }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "5px",
+                backgroundColor: "white", // white box
+                color: "#2C2C2C", // dark gray input text
+                caretColor: "#2C2C2C",
+
+                "& input, & textarea": {
+                  color: "#2C2C2C", // dark gray inside text
+                  textAlign: "left", // ensure left-aligned text
+                },
+
+                "& fieldset": {
+                  borderColor: "white", // border
+                },
+                "&:hover fieldset": {
+                  borderColor: "white",
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "white",
+                },
+                "& .MuiSelect-icon": {
+                  color: "#2C2C2C", // dropdown arrow
+                },
+              },
+
+              // ✅ Label always above, white, and left-aligned
+              "& .MuiInputLabel-root": {
+                color: "white",
+                fontWeight: 600,
+                fontSize: "1rem",
+                transform: "none", // stop floating behavior
+                position: "relative", // keep above input
+                marginBottom: "4px",
+                textAlign: "left", // keep label left-aligned
+              },
+              "& .MuiInputLabel-root.Mui-focused": {
+                color: "white", // stays white when focused
+              },
+
+              "& .MuiFormHelperText-root": {
+                color: "white", // helper/error text white if needed
+              },
+            }}
             label="Date of Birth (MM/DD/YYYY)"
             name="dateOfBirth"
             value={user.dateOfBirth}
@@ -243,7 +767,7 @@ export default function CreateUserForm() {
           <Button
             variant="outlined"
             fullWidth
-            sx={{ mt: 1 }}
+            sx={{ mt: 1, backgroundColor: "white" }}
             onClick={() => navigate(-1)}
           >
             Cancel
