@@ -182,7 +182,7 @@ git push origin feature/device-table
 | Role | Name |
 |------|------|
 | **Frontend Lead** | Emerson Albert |
-| **Frontend Developers** | Gary Montero, Christian D'Albano, Jared Pilewski, Reinaldo Guilfuchi  |
+| **Frontend Developers** | Gary Montero, Christian D'Albano, Tommy Chang  |
 | **Faculty Advisor** | Mary Walauskis |
 
 > Developed by senior software development students in partnership with the **City of Orlando**.

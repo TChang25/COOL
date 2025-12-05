@@ -136,7 +136,10 @@ function transformDevicesToInventory(devices) {
   devices.forEach((device) => {
     const centerName = device.location?.locationName || "Unknown Location";
     const type = device.type?.deviceTypeName || "Unknown";
-    const status = device.status?.deviceStatusName || "Unknown";
+
+    // ⭐ FIX: use deviceStatusId, not statusName (which is always "")
+    const statusId = device.status?.deviceStatusId;
+    const isAvailable = statusId === 1;
 
     if (!centers[centerName]) {
       centers[centerName] = {
@@ -148,25 +151,28 @@ function transformDevicesToInventory(devices) {
     }
 
     const entry = centers[centerName];
+    const lowerType = type.toLowerCase();
 
-    if (type === "Laptop") {
+    if (lowerType.includes("laptop")) {
       entry.laptops.total++;
-      if (status === "Available") entry.laptops.available++;
+      if (isAvailable) entry.laptops.available++;
     }
 
-    if (type === "Tablet") {
+    if (lowerType.includes("tablet")) {
       entry.tablets.total++;
-      if (status === "Available") entry.tablets.available++;
+      if (isAvailable) entry.tablets.available++;
     }
 
-    if (type === "Hotspot") {
+    if (lowerType.includes("hotspot")) {
       entry.hotspots.total++;
-      if (status === "Available") entry.hotspots.available++;
+      if (isAvailable) entry.hotspots.available++;
     }
   });
 
   return Object.values(centers);
 }
+
+
 
 // ========== FETCH DEVICES FROM BACKEND ==========
 const fetchInventoryData = async () => {
@@ -177,6 +183,7 @@ const fetchInventoryData = async () => {
   }
 
   const devices = await response.json();
+  console.log("RAW DEVICE API RESPONSE:", devices); // 👈 IMPORTANT
   return transformDevicesToInventory(devices);
 };
 
