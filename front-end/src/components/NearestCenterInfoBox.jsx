@@ -1,64 +1,87 @@
+// NearestCenterInfoBox.jsx
 import React, { useMemo, useState, useEffect } from "react";
 import { Box, Stack, Typography } from "@mui/material";
 import Button from "./Button";
 
-// the Haversine formula: this calculates distance between two latitude and longitude points
-// (for the "distance from user location to the center location" feature)
+/**
+ * Option A:
+ * Hard-coded coordinates for each location_id from the `location` table.
+ *
+ * ⚠️ IMPORTANT:
+ * The lat/lng values below are just placeholder examples so that
+ * distances are different. Replace them with real coordinates when you can.
+ */
+const LOCATION_COORDS = {
+  1: { lat: 28.545, lng: -81.387 }, // Callahan Neighborhood Center
+  2: { lat: 28.548, lng: -81.41 }, // Hankins Park Neighborhood Center
+  3: { lat: 28.565, lng: -81.43 }, // Northwest Neighborhood Center
+  4: { lat: 28.58, lng: -81.43 }, // Rosemont Neighborhood Center
+  5: { lat: 28.535, lng: -81.41 }, // Smith Neighborhood Center
+  6: { lat: 28.515, lng: -81.3 }, // Citrus Square Neighborhood Center
+  7: { lat: 28.54, lng: -81.31 }, // Engelwood Neighborhood Center
+  8: { lat: 28.535, lng: -81.4 }, // Jackson Neighborhood Center
+  9: { lat: 28.54, lng: -81.41 }, // L Claudia Allen Senior Center
+  10: { lat: 28.515, lng: -81.39 }, // Grand Avenue Neighborhood Center
+  11: { lat: 28.54, lng: -81.45 }, // Ivey Lane Neighborhood Center
+  12: { lat: 28.545, lng: -81.36 }, // Langford Park Neighborhood Center
+  13: { lat: 28.545, lng: -81.41 }, // Rock Lake Neighborhood Center
+  14: { lat: 28.515, lng: -81.37 }, // Wadeview Neighborhood Center
+  15: { lat: 28.52, lng: -81.33 }, // Dover Shores Neighborhood Center
+  16: { lat: 28.55, lng: -81.35 }, // Hispanic Office for Local Assistance
+};
+
+// -------------------
+// Haversine helpers
+// -------------------
 function toRad(deg) {
-  // converts degrees to radians
   return (deg * Math.PI) / 180;
 }
+
 function haversineMiles(a, b) {
-  // returns distance in miles between point a and b, where a and b are objects like {lat: , long: }
-  const R = 3958.8; // miles instead of kilometers (6371 km = 3958.8 miles)
+  const R = 3958.8; // miles
   const dLat = toRad(b.lat - a.lat);
   const dLng = toRad(b.lng - a.lng);
   const lat1 = toRad(a.lat);
   const lat2 = toRad(b.lat);
   const h = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
-  return 2 * R * Math.asin(Math.sqrt(h)); // final distance in miles
+  return 2 * R * Math.asin(Math.sqrt(h));
 }
 
-// Uses Nominatim (OpenStreetMap) to convert a full address string into {lat, lng}
-// If anything fails, it falls back to a default Orlando-ish coordinate.
-async function geocodeAddress(query) {
-  try {
-    const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-      query
-    )}`;
-    const response = await fetch(url);
-
-    if (response.ok) {
-      const data = await response.json();
-      if (Array.isArray(data) && data.length > 0) {
-        return {
-          lat: parseFloat(data[0].lat),
-          lng: parseFloat(data[0].lon),
-        };
-      }
-    }
-  } catch (err) {
-    console.error("Error geocoding address:", err);
-  }
-  // Fallback: Orlando city center (prevents the UI from breaking)
-  return { lat: 28.53833, lng: -81.37924 };
-}
-
-// Builds Google Maps search URL for "Get Directions" button
-// (The encodeURIComponent() method encodes special characters like: , / ? : @ & = + $ #)
+// Google Maps URL for "Get Directions"
 function mapsUrl(address) {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
 }
 
-// Component that renders ONE community center (one "card" in the list)
+// -------------------
+// Center row component
+// -------------------
 function CenterRow({
-  index, // the number in the results list
-  center, // a community center object (object is created by useMemo in the NearestCenterInfoBox component)
-  distanceMiles, // distance from user's location (if available)
-  eligibilityRoute = "/eligibility", // Where the Check Eligibility button should link to
-  availabilityRoute = "/device", // Where the Device Availability button should link to
-  onFocusOnMap, // optional callback to tell your map which center to highlight
+  index,
+  center,
+  distanceMiles,
+  eligibilityRoute = "/eligibility",
+  availabilityRoute = "/device",
+  onFocusOnMap,
 }) {
+  // --- Inspect what the backend actually sent us ---
+  console.log("CenterRow center object:", center);
+
+  // Try multiple possible field names for the street, just in case
+  const street =
+    center.streetAddress || center.address || center.locationAddress || center.street_address || "";
+
+  const city = center.city || "";
+  const state = center.state || "";
+  const zip = center.zipCode || center.zip_code || "";
+
+  // City/state/ZIP line for display
+  const cityStateZip = [city, state, zip].filter(Boolean).join(", ");
+
+  // This is the **string we will send to Google Maps**
+  const mapsAddress = [center.locationName, street, cityStateZip].filter(Boolean).join(", ");
+
+  console.log("Address for Maps:", mapsAddress);
+
   return (
     <Box
       sx={{
@@ -67,7 +90,6 @@ function CenterRow({
         bgcolor: "primary.dark",
         color: "white",
         boxShadow: 2,
-        // override MUI Button styles within this component
         "& .MuiButton-root": {
           fontSize: 14,
           justifyContent: "center",
@@ -76,13 +98,10 @@ function CenterRow({
           padding: 0,
         },
       }}
-      // highlights this center on a map when hovering
       onMouseEnter={() => onFocusOnMap && onFocusOnMap(center.locationId)}
     >
       <Typography variant="h6" sx={{ fontWeight: 700 }}>
-        {/* number in the results list with the center name */}
         {index}. {center.locationName}
-        {/* distance to center from address entered */}
         {Number.isFinite(distanceMiles) && (
           <Typography component="span" sx={{ marginLeft: 1, fontWeight: 500 }}>
             ({distanceMiles.toFixed(1)} miles away)
@@ -90,13 +109,15 @@ function CenterRow({
         )}
       </Typography>
 
-      {/* full street address */}
-      <Typography sx={{ marginTop: 0.5, marginLeft: 5 }}>{center.fullAddress}</Typography>
+      {/* Street line */}
+      {street && <Typography sx={{ marginTop: 0.5, marginLeft: 5 }}>{street}</Typography>}
 
-      {/* hours (not in DB yet → show fallback message) + phone */}
+      {/* City / State / ZIP line */}
+      {cityStateZip && <Typography sx={{ marginLeft: 5 }}>{cityStateZip}</Typography>}
+
+      {/* Phone */}
       <Typography sx={{ marginTop: 0.5, marginLeft: 5 }}>Phone: {center.contactNumber}</Typography>
 
-      {/* this Stack component holds the action buttons */}
       <Stack
         direction={{ xs: "column", sm: "row" }}
         spacing={2}
@@ -107,15 +128,17 @@ function CenterRow({
         useFlexGap
         flexWrap="wrap"
       >
-        {/* "Get Directions" button leads to an external link to google maps with the center's address*/}
+        {/* Get Directions uses the combined name + street + city/state/zip */}
         <Button
           varianttype="submit"
-          onClick={() => window.open(mapsUrl(center.fullAddress), "_blank", "noopener")}
+          onClick={() => {
+            console.log("Opening Google Maps for:", mapsAddress);
+            window.open(mapsUrl(mapsAddress), "_blank", "noopener");
+          }}
         >
           Get Directions
         </Button>
 
-        {/* Internal routes to link to other pages of the website */}
         <Button varianttype="submit" route={eligibilityRoute}>
           Check Eligibility
         </Button>
@@ -128,21 +151,20 @@ function CenterRow({
   );
 }
 
-// This is the main component that lists nearest centers with availability info
+// -------------------
+// Main component
+// -------------------
 const NearestCenterInfoBox = ({
   userCoords = null, // { lat, lng } from AddressSearch
   eligibilityRoute = "/eligibility",
   availabilityRoute = "/device",
   onFocusOnMap,
 }) => {
-  const [centersData, setCentersData] = useState([]); // locations from DB (+ coords)
-  const [devicesData, setDevicesData] = useState([]); // devices from DB
+  const [centersData, setCentersData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
 
-  // -------------------------
-  // Fetch locations + devices, then geocode locations
-  // -------------------------
+  // Fetch locations from backend (no geocoding here)
   useEffect(() => {
     async function loadData() {
       setIsLoading(true);
@@ -150,60 +172,44 @@ const NearestCenterInfoBox = ({
 
       try {
         const locationsRes = await fetch("/api/locations");
-
         if (!locationsRes.ok) {
           throw new Error("Failed to load locations");
         }
 
         const locations = await locationsRes.json();
 
-        // 2) Build fullAddress string for each location
-        const locationsWithAddress = locations.map((loc) => {
-          const fullAddress = [loc.streetAddress, loc.city, loc.state, loc.zipCode]
-            .filter(Boolean)
-            .join(", ");
+        // inside loadData(), when we map locations:
+        const locationsWithExtras = locations.map((loc) => {
+          // Try several possible field names in case your JSON uses "address" instead of "streetAddress"
+          const street = loc.streetAddress || loc.address || loc.street_address || "";
+
+          const city = loc.city || "";
+          const state = loc.state || "";
+          const zip = loc.zipCode || loc.zip_code || "";
+
+          // This is what we’ll pass to Google Maps
+          const fullAddress = [street, city, state, zip].filter(Boolean).join(", ");
 
           return {
             ...loc,
             fullAddress,
-            // coords will be added later
+            coords: LOCATION_COORDS[loc.locationId] || null,
           };
         });
 
-        // 3) Immediately show data from the backend
-        setCentersData(locationsWithAddress);
-
-        // We are done talking to our own API, so stop "Loading…" state now
-        setIsLoading(false);
-
-        // 4) Geocode in the background (do NOT await this in loadData)
-        Promise.all(
-          locationsWithAddress.map(async (loc) => {
-            const coords = await geocodeAddress(loc.fullAddress);
-            return { ...loc, coords };
-          })
-        )
-          .then((geocodedLocations) => {
-            // Update centers with coords once geocoding finishes
-            setCentersData(geocodedLocations);
-          })
-          .catch((err) => {
-            console.error("Error geocoding locations:", err);
-            // optional: you could set some 'geocodeError' state here if you want
-          });
+        setCentersData(locationsWithExtras);
       } catch (err) {
         console.error("Error loading locations:", err);
         setLoadError("Unable to load locations from the server.");
-        setIsLoading(false); // make sure we don't get stuck
+      } finally {
+        setIsLoading(false);
       }
     }
 
     loadData();
   }, []);
 
-  // -------------------------
-  // Compute distance + availability, then sort rows
-  // -------------------------
+  // Compute distance + sort
   const rows = useMemo(() => {
     if (!centersData || centersData.length === 0) return [];
 
@@ -214,11 +220,16 @@ const NearestCenterInfoBox = ({
     });
 
     if (userCoords) {
-      enriched.sort((a, b) => a.distanceMiles - b.distanceMiles);
-    } else {
-      enriched.sort((a, b) => a.center.locationName.localeCompare(b.center.locationName));
+      // Sort centers with a valid distance first, then any without coords
+      const withCoords = enriched.filter((r) => Number.isFinite(r.distanceMiles));
+      const withoutCoords = enriched.filter((r) => !Number.isFinite(r.distanceMiles));
+
+      withCoords.sort((a, b) => a.distanceMiles - b.distanceMiles);
+      return [...withCoords, ...withoutCoords];
     }
 
+    // No userCoords → sort alphabetically by name
+    enriched.sort((a, b) => a.center.locationName.localeCompare(b.center.locationName));
     return enriched;
   }, [centersData, userCoords]);
 
@@ -228,15 +239,12 @@ const NearestCenterInfoBox = ({
         bgcolor: "primary.dark",
         color: "white",
         p: { xs: 2, md: 3 },
-        // fixed size that matches the mock up design sizing, with scroll for overflow
         width: 564,
         height: 470,
         overflowY: "auto",
-        // override MUI Typography styles within this component (makes text white, same as box text color)
         "& .MuiTypography-root": {
           color: "inherit",
         },
-        //makes the scrollbar invisible
         "&::-webkit-scrollbar": { display: "none" },
       }}
     >
@@ -271,5 +279,4 @@ const NearestCenterInfoBox = ({
   );
 };
 
-// exports the component as default
 export default NearestCenterInfoBox;
