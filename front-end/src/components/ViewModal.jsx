@@ -7,9 +7,19 @@ import {
   Divider,
   Box,
 } from "@mui/material";
-import Button from "./Button"; // ✅ import your custom AppButton
+import Button from "./Button";
 
 const ViewModal = ({ open, onClose, device }) => {
+
+const statusLookup = {
+  1: "Available",
+  2: "Loaned",
+  3: "Maintenance",
+  4: "Retired",
+  5: "Lost",
+};
+
+
   return (
     <Modal
       open={open}
@@ -45,22 +55,29 @@ const ViewModal = ({ open, onClose, device }) => {
                   color: "white",
                 }}
               >
-                {device.name}
+                {device.deviceName}
               </Typography>
 
               <Divider sx={{ bgcolor: "white", mb: 2 }} />
 
               <Typography sx={{ color: "white" }}>
-                <strong>Type:</strong> {device.type}
+                <strong>Type:</strong> {device.type?.deviceTypeName || "N/A"}
               </Typography>
+
               <Typography sx={{ color: "white" }}>
-                <strong>Serial:</strong> {device.serial}
+                <strong>Serial Number:</strong> {device.serialNumber}
               </Typography>
+
               <Typography sx={{ color: "white" }}>
-                <strong>Status:</strong> {device.status}
+                <strong>Status: </strong> 
+                {device.status?.deviceStatusName ||
+                  statusLookup[device.status?.deviceStatusId] ||
+                  "Unknown"}
               </Typography>
+
               <Typography sx={{ color: "white" }}>
-                <strong>Location:</strong> {device.location}
+                <strong>Location:</strong>{" "}
+                {device.location?.locationName || "N/A"}
               </Typography>
 
               <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
@@ -70,7 +87,9 @@ const ViewModal = ({ open, onClose, device }) => {
               </Box>
             </>
           ) : (
-            <Typography>Loading device information...</Typography>
+            <Typography sx={{ textAlign: "center" }}>
+              Loading device information...
+            </Typography>
           )}
         </CardContent>
       </Card>

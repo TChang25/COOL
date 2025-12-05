@@ -29,20 +29,9 @@ const RequirementEligibility = () => {
             Requirements: <br />
             - Must live within City of Orlando limits <br />
             - Must be 18 years or older <br />
-            <br />
           </Typography>
         </Box>
-        <Box
-          sx={{
-            width: "90%",
-            height: "80%",
-          }}
-        >
-          <Typography variant="h5">
-            <br />
-            Result: ❌ Sorry, this program is only available to City of Orlando residents age 18+
-          </Typography>
-        </Box>
+        
         <Box
           sx={{
             width: "90%",
