@@ -1,5 +1,6 @@
 site_name: COOL Docs
 site_url: 
+
 theme:
   name: material
   features:
@@ -23,3 +24,16 @@ extra_css:
 extra_javascript:
   - https://unpkg.com/mermaid@10/dist/mermaid.min.js
   - js/mermaid-init.js
+plugins:
+  - to-pdf:
+      author: |
+              Team Leads: Tommy Chang, Emerson Albert
+              Front-end: Christian D'Albano, Gary Montero, Reinaldo Guilfuchi
+              Back-end: Connor Jenkins, Jared Pilewski, Jordan Esperance, Jorge Delgado, Jose Cartagena, Shonta Lowe
+              Database: Nova Robb 
+      cover_title: City of Orlando Loaners
+      cover_subtitle: "Development Documentation/Manual"
+      copyright: ""
+      cover_logo: ""
+      toc_level: 3
+      ordered_chapter_level: 2
