@@ -25,10 +25,10 @@ const EligibilityPage = () => {
       >
         Eligibility
       </Typography>
-      <AddressSearch
+      {/* <AddressSearch
         onSearch={({ coords }) => setUserCoords(coords)}
         initialAddress=""
-      />
+      /> */}
 
       <RequirementEligibility />
     </Box>

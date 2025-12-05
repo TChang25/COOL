@@ -1,3 +1,4 @@
+// /src/components/DeviceAvailabilityTable.jsx
 import React from "react";
 import {
   Table,
@@ -8,27 +9,35 @@ import {
   TableRow,
   Paper,
   Box,
-  Typography, // 🟢 ADDED (needed for "No information available")
+  Typography,
+  CircularProgress,
 } from "@mui/material";
 import Button from "./Button";
-import { devices } from "../data/mockData";
 import { useAuth } from "../context/MockAuth";
 import { useNavigate } from "react-router-dom";
 import ViewModal from "./ViewModal";
 
-
-
 const DeviceAvailabilityTable = ({
-  selectedCenter = "", // 🟢 Added default values so props never break
+  selectedCenter = "",
   selectedFilter = "All",
 }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const role = user?.role || "Citizen";
 
+  // ------------------------------
+  // STATE
+  // ------------------------------
+  const [devices, setDevices] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState(null);
+
   const [openModal, setOpenModal] = React.useState(false);
   const [selectedDevice, setSelectedDevice] = React.useState(null);
 
+  // ------------------------------
+  // MODAL HANDLERS
+  // ------------------------------
   const handleOpenModal = (device) => {
     setSelectedDevice(device);
     setOpenModal(true);
@@ -39,42 +48,101 @@ const DeviceAvailabilityTable = ({
     setSelectedDevice(null);
   };
 
+  // ------------------------------
+  // FETCH REAL DEVICES FROM BACKEND
+  // ------------------------------
+  React.useEffect(() => {
+    const loadDevices = async () => {
+      try {
+        const res = await fetch("/api/devices");
 
-  // 🧮 Safe filtering logic
-  const filteredDevices = Array.isArray(devices)
-    ? devices.filter((device) => {
-        const matchesCenter =
-          !selectedCenter || device.location === selectedCenter;
+        if (!res.ok) {
+          throw new Error("Failed to fetch devices");
+        }
 
-        const matchesFilter =
-          selectedFilter === "All" ||
-          device.status === selectedFilter ||
-          device.type === selectedFilter;
+        const data = await res.json();
+        setDevices(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error(err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-        return matchesCenter && matchesFilter;
-      })
-    : [];
+    loadDevices();
+  }, []);
 
-  // ✅ Role-based actions
+  // ------------------------------
+  // DELETE DEVICE
+  // ------------------------------
+  const handleDeleteDevice = async (deviceId) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this device?"
+    );
+    if (!confirmed) return;
+
+    try {
+      const res = await fetch(`/api/devices/${deviceId}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) throw new Error("Failed to delete device");
+
+      setDevices((prev) =>
+        prev.filter((device) => device.deviceId !== deviceId)
+      );
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  // ------------------------------
+  // FILTERING LOGIC (FIXED — SQL STATUS SUPPORT)
+  // ------------------------------
+  const filteredDevices = devices.filter((device) => {
+    const matchesCenter =
+      !selectedCenter || device.location?.locationName === selectedCenter;
+
+    const matchesStatus =
+      selectedFilter === "All" ||
+      device.status?.deviceStatusName === selectedFilter;
+
+    return matchesCenter && matchesStatus;
+  });
+
+  // ------------------------------
+  // ROLE-BASED ACTION BUTTONS
+  // ------------------------------
   const renderActionButton = (device) => {
     if (role !== "Citizen") {
       return (
         <Box sx={{ display: "flex", gap: 1 }}>
+          {/* EDIT */}
+          <Button varianttype="edit" route={`/devices/edit/${device.deviceId}`}>
+            Edit
+          </Button>
+
+          {/* DELETE */}
+          <Button
+            varianttype="delete"
+            onClick={() => handleDeleteDevice(device.deviceId)}
+          >
+            Delete
+          </Button>
+
+          {/* CHECK IN */}
           <Button
             varianttype="check"
-            onClick={() => {
-              console.log("Check In:", device.name)
-              navigate('/DeviceCheckIn')
-            }}
+            onClick={() => navigate("/DeviceCheckIn")}
           >
             Check In
           </Button>
+
+          {/* CHECK OUT */}
           <Button
             varianttype="check"
-            onClick={() => {
-              console.log("Check In:", device.name)
-              navigate('/DeviceCheckOut')
-            }}
+            onClick={() => navigate("/DeviceCheckOut")}
           >
             Check Out
           </Button>
@@ -89,6 +157,27 @@ const DeviceAvailabilityTable = ({
     );
   };
 
+  // ------------------------------
+  // RENDER
+  // ------------------------------
+  if (loading) {
+    return (
+      <Box sx={{ width: "100%", display: "flex", justifyContent: "center", py: 5 }}>
+        <CircularProgress size={40} />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Typography
+        sx={{ textAlign: "center", color: "red", fontSize: "1.2rem", mt: 4 }}
+      >
+        {error}
+      </Typography>
+    );
+  }
+
   return (
     <>
       <TableContainer
@@ -98,22 +187,36 @@ const DeviceAvailabilityTable = ({
           borderRadius: "12px",
           color: "white",
           width: "90%",
-          margin: "auto",
+          maxWidth: "1100px",
+          margin: "10px auto",
+          boxShadow: 3,
         }}
       >
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>
-                Device
+              <TableCell
+                align="center"
+                sx={{ color: "white", fontWeight: "bold" }}
+              >
+                Device Type
               </TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>
-                Device ID
+              <TableCell
+                align="center"
+                sx={{ color: "white", fontWeight: "bold" }}
+              >
+                Serial Number
               </TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>
-                Availability Status
+              <TableCell
+                align="center"
+                sx={{ color: "white", fontWeight: "bold" }}
+              >
+                Status
               </TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+              <TableCell
+                align="center"
+                sx={{ color: "white", fontWeight: "bold", width: "450px" }}
+              >
                 Action
               </TableCell>
             </TableRow>
@@ -122,16 +225,25 @@ const DeviceAvailabilityTable = ({
           <TableBody>
             {filteredDevices.length > 0 ? (
               filteredDevices.map((device, index) => (
-                <TableRow key={device.id || index}>
-                  <TableCell sx={{ color: "white" }}>
-                    {`${index + 1}. ${device.type}`}
+                <TableRow align="center" key={device.deviceId || index}>
+                  {/* TYPE */}
+                  <TableCell align="center" sx={{ color: "white" }}>
+                    {device.type?.deviceTypeName || "Unknown"}
                   </TableCell>
-                  <TableCell sx={{ color: "white" }}>{device.serial}</TableCell>
-                  <TableCell>
+
+                  {/* SERIAL */}
+                  <TableCell align="center" sx={{ color: "white" }}>
+                    {device.serialNumber}
+                  </TableCell>
+
+                  {/* STATUS */}
+                  <TableCell align="center" >
                     <Box
                       sx={{
                         backgroundColor:
-                          device.status === "Available" ? "#009739" : "#C8102E",
+                          device.status?.deviceStatusId === 1
+                            ? "#009739"
+                            : "#C8102E",
                         color: "white",
                         borderRadius: "12px",
                         textAlign: "center",
@@ -139,10 +251,14 @@ const DeviceAvailabilityTable = ({
                         fontWeight: "bold",
                       }}
                     >
-                      {device.status}
+                      {device.status?.deviceStatusName}
                     </Box>
                   </TableCell>
-                  <TableCell>{renderActionButton(device)}</TableCell>
+
+                  {/* ACTION BUTTONS */}
+                  <TableCell align="center" sx={{ width: "400px" }}>
+                    {renderActionButton(device)}
+                  </TableCell>
                 </TableRow>
               ))
             ) : (
@@ -166,7 +282,7 @@ const DeviceAvailabilityTable = ({
         </Table>
       </TableContainer>
 
-      {/* ✅ Modal now rendered inside the component */}
+      {/* MODAL */}
       <ViewModal
         open={openModal}
         onClose={handleCloseModal}
@@ -174,7 +290,6 @@ const DeviceAvailabilityTable = ({
       />
     </>
   );
-
 };
 
 export default DeviceAvailabilityTable;
