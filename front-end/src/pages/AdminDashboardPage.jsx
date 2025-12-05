@@ -54,7 +54,7 @@ const AdminDashboardPage = () => {
         <LoanTable />
         <DeviceInventory />
         <UsageStatistics />
-        <EmployeeManagement />
+        {/* <EmployeeManagement /> */}
         <UserTable />
       </Box>
     </Box>
