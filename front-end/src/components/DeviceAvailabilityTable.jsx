@@ -187,6 +187,7 @@ const DeviceAvailabilityTable = ({
           borderRadius: "12px",
           color: "white",
           width: "90%",
+          maxWidth: "1100px",
           margin: "10px auto",
           boxShadow: 3,
         }}
@@ -194,16 +195,28 @@ const DeviceAvailabilityTable = ({
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+              <TableCell
+                align="center"
+                sx={{ color: "white", fontWeight: "bold" }}
+              >
                 Device Type
               </TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+              <TableCell
+                align="center"
+                sx={{ color: "white", fontWeight: "bold" }}
+              >
                 Serial Number
               </TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+              <TableCell
+                align="center"
+                sx={{ color: "white", fontWeight: "bold" }}
+              >
                 Status
               </TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+              <TableCell
+                align="center"
+                sx={{ color: "white", fontWeight: "bold", width: "450px" }}
+              >
                 Action
               </TableCell>
             </TableRow>
@@ -212,19 +225,19 @@ const DeviceAvailabilityTable = ({
           <TableBody>
             {filteredDevices.length > 0 ? (
               filteredDevices.map((device, index) => (
-                <TableRow key={device.deviceId || index}>
+                <TableRow align="center" key={device.deviceId || index}>
                   {/* TYPE */}
-                  <TableCell sx={{ color: "white" }}>
+                  <TableCell align="center" sx={{ color: "white" }}>
                     {device.type?.deviceTypeName || "Unknown"}
                   </TableCell>
 
                   {/* SERIAL */}
-                  <TableCell sx={{ color: "white" }}>
+                  <TableCell align="center" sx={{ color: "white" }}>
                     {device.serialNumber}
                   </TableCell>
 
                   {/* STATUS */}
-                  <TableCell>
+                  <TableCell align="center" >
                     <Box
                       sx={{
                         backgroundColor:
@@ -243,7 +256,9 @@ const DeviceAvailabilityTable = ({
                   </TableCell>
 
                   {/* ACTION BUTTONS */}
-                  <TableCell>{renderActionButton(device)}</TableCell>
+                  <TableCell align="center" sx={{ width: "400px" }}>
+                    {renderActionButton(device)}
+                  </TableCell>
                 </TableRow>
               ))
             ) : (
